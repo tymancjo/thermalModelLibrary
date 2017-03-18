@@ -33,14 +33,28 @@ def plotCurves(timeTable,dataArray,plotName,xLabel,yLabel,curvesLabelArray):
     plt.figure(plotName)
     #let's go for each column and add it to plot it with label
     for i in range(0,curvesNumber):
-        plt.plot(timeTable, dataArray[:,i] , label="["+curvesLabelArray[i]+"]")
+
+        # Let's check if the names are array
+        if hasattr(curvesLabelArray, "__len__") and (not isinstance(curvesLabelArray, str)):
+            #and then use it per curve or as startic text
+            plotLabel = "["+str(curvesLabelArray[i])+"]"
+            plt.plot(timeTable, dataArray[:,i] , label=plotLabel)
+        # or is string
+        elif hasattr(curvesLabelArray, "__len__"):
+            plotLabel = curvesLabelArray+'['+str(i)+']'
+            plt.plot(timeTable, dataArray[:,i] , label=plotLabel)
+        # of if set to false - do not show labels and legend
+        else:
+            plt.plot(timeTable, dataArray[:,i])
+
 
 
     #Lets setup look of olot
     plt.ylabel(yLabel)
     plt.xlabel(xLabel)
     plt.grid(1)
-    plt.legend(bbox_to_anchor=(0.75, 0.95), loc=2, borderaxespad=0.)
+    if curvesLabelArray:
+        plt.legend(bbox_to_anchor=(0.75, 0.95), loc=2, borderaxespad=0.)
 
 
 
@@ -65,8 +79,12 @@ def drawCuShape(barGeometry, isLabConnect, figureName):
 
     for i in range(0,numberOfSegments,1):
         if i== 0 or i==numberOfSegments-1:
-            colourOfBar = '#c46f1b'
-            segmentLabel = "LAB["+str(i)+"]"
+            if isLabConnect:
+                colourOfBar = '#c46f1b'
+                segmentLabel = "LAB["+str(i)+"]"
+            else:
+                colourOfBar = '#f49b42'
+                segmentLabel = str(i)
         else:
             colourOfBar = '#f49b42'
             segmentLabel = str(i)
