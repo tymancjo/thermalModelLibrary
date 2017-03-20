@@ -4,13 +4,15 @@ from scipy.interpolate import spline
 from scipy.interpolate import InterpolatedUnivariateSpline
 
 from matplotlib.widgets import Slider, Button, RadioButtons
-
+import matplotlib.animation as animation
 
 #importing our own library
 from thermalModelLibrary import functionsLibrary as tml
 from thermalModelLibrary import geometryLib as gml
 
-time = np.arange(0, 10, 0.002) # Zdefiniujmy sobie wektor czasu
+# Zdefiniujmy sobie wektor czasu
+time = np.arange(0, 30*1, 0.01)
+
 #Zdefiniujmy funkcję opisująca prąd w czasie
 def Icw(czas, czasMax, iRMS):
     if czas <= czasMax:
@@ -31,7 +33,7 @@ segmentsArray = []
 segmentsXpositionArray = []
 
 
-for analiza in range(1,15,3):
+for analiza in range(4,14,1):
 
 
     copperBarGeometry = np.array([\
@@ -64,9 +66,9 @@ for analiza in range(1,15,3):
     totalXsoFar = 0.0
 
     for segment in range(len(copperBarGeometry)):
-        totalXsoFar += 0.5*copperBarGeometry[segment][2]
+        totalXsoFar += float(copperBarGeometry[segment][2])/2
         temporatyXpositionArray.append(totalXsoFar)
-        totalXsoFar += 0.5*copperBarGeometry[segment][2]
+        totalXsoFar += float(copperBarGeometry[segment][2])/2
 
     segmentsXpositionArray.append(temporatyXpositionArray)
 
@@ -101,7 +103,9 @@ def tDAT(timeSample,analysis,xPositions,thermalResults):
 
 
 
-axis_color = 'lightgoldenrodyellow'
+axis_color = 'grey'
+plt.style.use('fivethirtyeight')
+
 fig = plt.figure()
 
 # Draw the plot
@@ -109,17 +113,19 @@ ax = fig.add_subplot(111)
 fig.subplots_adjust(left=0.25, bottom=0.25)
 ax.set_ylim([25, 145])
 
+startTimeSample = int(3/(time[1]-time[0]))
 
 segX = segmentsXpositionArray
 masR = masterResultsArray
 lenR = len(masR)-0.5 #zabezpieczenie przed przekroczeniem indeku maks
 
-[line] = ax.plot(tDAT(1500,1,segX, masR)[0],tDAT(1500,1,segX, masR)[1],\
+[line] = ax.plot(tDAT(startTimeSample,1,segX, masR)[0],\
+tDAT(startTimeSample,1,segX, masR)[1],\
  linewidth=2, color='red')
 
 # Add two sliders for tweaking the parameters
 amp_slider_ax  = fig.add_axes([0.25, 0.15, 0.65, 0.03], facecolor=axis_color)
-amp_slider = Slider(amp_slider_ax, 'timeStep', 0, len(time)-1, valinit=1500)
+amp_slider = Slider(amp_slider_ax, 'timeStep', 0, len(time)-1, valinit=startTimeSample)
 
 anl_slider_ax = fig.add_axes([0.25, 0.1, 0.65, 0.03], facecolor=axis_color)
 anl_slider = Slider(anl_slider_ax, 'Analiza', 0, lenR, valinit=0)
@@ -137,5 +143,7 @@ def sliders_on_changed(val):
 
 amp_slider.on_changed(sliders_on_changed)
 anl_slider.on_changed(sliders_on_changed)
+
+
 
 plt.show()

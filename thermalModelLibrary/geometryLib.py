@@ -24,7 +24,7 @@ def slicer(barGeometry):
             segmentDivideFactor = int(segmentLenght / desiredSegmentLenght)
 
             #now lets calculate the new lenght
-            segmentLenght = segmentLenght / segmentDivideFactor
+            segmentLenght = float(segmentLenght) / float(segmentDivideFactor)
 
             #and put required number of sub segments into geoemtry array
             for subsegment in range (0,segmentDivideFactor):
