@@ -13,19 +13,57 @@ from matplotlib import cm
 from thermalModelLibrary import functionsLibrary as tml
 from thermalModelLibrary import geometryLib as gml
 
+def prepareDrawCuShape(barGeometry,barSubPlot):
+
+    numberOfSegments = barGeometry.shape[0]
+    #checking for max bar height in all segments
+    #and set the center of bar position y
+    yMax = np.max(barGeometry, axis=0)[0]
+    centerY = yMax/2
+
+    currentX = 0
+
+    colourOfBar = '#f49b42'
+
+    for i in range(0,numberOfSegments,1):
+        # Ploting main coppershape of the segment
+        currentY = centerY-barGeometry[i, 0]/2
+        segment = plt.Rectangle((currentX, currentY),barGeometry[i, 2]\
+        ,barGeometry[i, 0], fc=colourOfBar, linestyle='dashed',\
+        edgecolor='grey')
+
+        barSubPlot.add_patch(segment)
+
+        if barGeometry[i, 3] != 0:
+            # Drawing the hole in segment
+            hole = plt.Rectangle((currentX, \
+            currentY+(barGeometry[i, 0]/2)-(barGeometry[i, 3]/2)),\
+            barGeometry[i, 2],barGeometry[i, 3], fc='w')
+            barSubPlot.add_patch(hole)
+
+        currentX += barGeometry[i, 2]
+
+    barSubPlot.set_ylim([0, yMax])
+    barSubPlot.set_xlim([0, currentX])
+
+    return
+
+
+
+
 # Zdefiniujmy sobie wektor czasu
 time = np.arange(0, 60*1, 0.01)
 
 #Zdefiniujmy funkcję opisująca prąd w czasie
-def Icw(czas, czasMax, iRMS):
-    if czas <= czasMax:
+def Icw(czas, czasMin,czasMax, iRMS):
+    if czas <= czasMax and czas >= czasMin:
         return iRMS
     else:
         return 0
 
 #Zwektoryzujmy nasza funkcję opisująca prąd (zapiszmy jako wektor)
 Icw_vector = np.vectorize(Icw)
-current = Icw_vector(time,3,25e3)
+current = Icw_vector(time,15,40,5e3)
 
 
 masterResultsArray = [] # Superzestaw wszytskich wyników
@@ -43,7 +81,9 @@ for analiza in range(5,6,1):
                                   [40,10,10,0],\
                                   [40,10,15,14],\
                                   [40,10,15-analiza,0],\
-                                  [40,10,200,0],\
+                                  [40,10,95,0],\
+                                  [40,10,10,20],\
+                                  [40,10,95,0],\
                                   [40,10,15-analiza,0],\
                                   [40,10,15,14],\
                                   [40,10,10,0],\
@@ -108,19 +148,42 @@ Z = np.transpose(masterResultsArray[0])
 plt.style.use('bmh')
 fig = plt.figure()
 
-ax = fig.add_subplot(2,1,1)
+
+# title_font = {'fontname':'Arial', 'size':'11', 'color':'black', 'weight':'normal',
+#               'verticalalignment':'bottom'} # Bottom vertical alignment for more space
+# axis_font = {'fontname':'Arial', 'size':'10'}
+
+title_font = { 'size':'11', 'color':'black', 'weight':'normal'} # Bottom vertical alignment for more space
+axis_font = { 'size':'10'}
+
+
+barSubPlot = fig.add_subplot(4,1,1)
+prepareDrawCuShape(barGeometry=copperBarGeometry,barSubPlot=barSubPlot)
+barSubPlot.set_title('Analyzed geometry', **title_font)
+plt.ylabel('height [mm]', **axis_font)
+plt.xlabel('lenght x [mm]', **axis_font)
+plt.axis('scaled')
+
+wykresIcwTime = fig.add_subplot(4,1,2)
+wykresIcwTime.plot(time,current)
+wykresIcwTime.set_xlim([time[0], time[-1]])
+plt.ylabel('Current [A]', **axis_font)
+plt.xlabel('Time [s]')
+
+wykresTempTime = fig.add_subplot(4,1,3)
+wykresTempTime.plot(time,masterResultsArray[0])
+wykresTempTime.set_xlim([time[0], time[-1]])
+plt.ylabel('Temperature [degC]', **axis_font)
+#plt.xlabel('Time [s]')
+
+ax = fig.add_subplot(4,1,4)
 im = ax.imshow(Z, cmap='jet', aspect="auto",extent=[time[0],time[-1],\
 segmentsXpositionArray[0][0],segmentsXpositionArray[0][-1]], interpolation='spline16')
-ax.set_title('TimeSpace temperature distribution')
-plt.ylabel('Position [mm]')
-plt.xlabel('Time [s]')
+ax.set_title('TimeSpace temperature distribution', **title_font)
+plt.ylabel('Position [mm]', **axis_font)
+# plt.xlabel('Time [s]', **axis_font)
 fig.colorbar(im, orientation='horizontal',label='Temperature [degC]',alpha=0.5,\
 fraction=0.046, pad=0.2)
-
-wykres = fig.add_subplot(2,1,2)
-wykres.plot(time,masterResultsArray[0])
-wykres.set_xlim([time[0], time[-1]])
-plt.ylabel('Temperature [degC]')
-plt.xlabel('Time [s]')
+fig.subplots_adjust(hspace = 0.3)
 
 plt.show()
