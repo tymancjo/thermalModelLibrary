@@ -6,12 +6,15 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 from matplotlib.widgets import Slider, Button, RadioButtons
 import matplotlib.animation as animation
 
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+
 #importing our own library
 from thermalModelLibrary import functionsLibrary as tml
 from thermalModelLibrary import geometryLib as gml
 
 # Zdefiniujmy sobie wektor czasu
-time = np.arange(0, 30*1, 0.01)
+time = np.arange(0, 60*10, 0.01)
 
 #Zdefiniujmy funkcję opisująca prąd w czasie
 def Icw(czas, czasMax, iRMS):
@@ -33,7 +36,7 @@ segmentsArray = []
 segmentsXpositionArray = []
 
 
-for analiza in range(4,14,1):
+for analiza in range(10,11,1):
 
 
     copperBarGeometry = np.array([\
@@ -45,8 +48,8 @@ for analiza in range(4,14,1):
                                   [40,10,15,14],\
                                   [40,10,10,0],\
                                   ])
-    if masterIndex > 0:
-        copperBarGeometry = gml.slicer(copperBarGeometry)
+    #if masterIndex > 0:
+    copperBarGeometry = gml.slicer(copperBarGeometry)
 
     print('Elementów szyny: '+str(len(copperBarGeometry)))
 
@@ -73,7 +76,7 @@ for analiza in range(4,14,1):
     segmentsXpositionArray.append(temporatyXpositionArray)
 
 
-    #tml.plotCurves(timeTable=time,\
+    # tml.plotCurves(timeTable=time,\
     #           dataArray=masterResultsArray[masterIndex],\
     #           plotName='Symulacja'+str(analiza),xLabel='time [s]',yLabel='Temperature [degC]',\
     #           curvesLabelArray = False)
@@ -101,49 +104,80 @@ def temperatureDistribution(timeSample):
 def tDAT(timeSample,analysis,xPositions,thermalResults):
     return xPositions[analysis], thermalResults[analysis][timeSample][:]
 
+# fig = plt.figure('Summary')
+# temperatureDistribution(300)
+# plt.show()
 
 
-axis_color = 'grey'
-plt.style.use('fivethirtyeight')
+# axis_color = 'grey'
+# plt.style.use('fivethirtyeight')
+#
+# fig = plt.figure()
+#
+# # Draw the plot
+# ax = fig.add_subplot(111)
+# fig.subplots_adjust(left=0.25, bottom=0.25)
+# ax.set_ylim([25, 145])
+#
+# startTimeSample = int(3/(time[1]-time[0]))
+#
+# segX = segmentsXpositionArray
+# masR = masterResultsArray
+# lenR = len(masR)-0.5 #zabezpieczenie przed przekroczeniem indeku maks
+#
+# [line] = ax.plot(tDAT(startTimeSample,0,segX, masR)[0],\
+# tDAT(startTimeSample,0,segX, masR)[1])
+#
+# # Add two sliders for tweaking the parameters
+# amp_slider_ax  = fig.add_axes([0.25, 0.15, 0.65, 0.03], facecolor=axis_color)
+# amp_slider = Slider(amp_slider_ax, 'timeStep', 0, len(time)-1, valinit=startTimeSample)
+#
+# anl_slider_ax = fig.add_axes([0.25, 0.1, 0.65, 0.03], facecolor=axis_color)
+# anl_slider = Slider(anl_slider_ax, 'Analiza', 0, lenR, valinit=0)
+#
+# ax.set_title('time='+str(round(time[int(amp_slider.val)],2))+\
+# 's. BarSegments: '+str(segmentsArray[int(anl_slider.val)]))
+#
+# def sliders_on_changed(val):
+#     line.set_xdata(tDAT(int(amp_slider.val),int(anl_slider.val),segX, masR)[0])
+#     line.set_ydata(tDAT(int(amp_slider.val),int(anl_slider.val),segX, masR)[1])
+#
+#     ax.set_title('time='+str(round(time[int(amp_slider.val)],2))+\
+#     's. BarSegments: '+str(segmentsArray[int(anl_slider.val)]))
+#     fig.canvas.draw_idle()
+#
+# amp_slider.on_changed(sliders_on_changed)
+# anl_slider.on_changed(sliders_on_changed)
+#
+#
+# plt.show()
+#
+# fig = plt.figure()
+# ax = fig.gca(projection='3d')
+#
+# # Make data.
+# X = np.arange(0,len(segmentsXpositionArray[0]))
+# Y = np.arange(0,len(time))
+#
+# X, Y = np.meshgrid(X, Y)
+#
+# # Plot the surface.masterResultsArray[analysis][timeSample][:]
+# surf = ax.plot_surface(segmentsXpositionArray[0][X], time[Y], masterResultsArray[0][Y][X], cmap=cm.coolwarm,
+#                        linewidth=0, antialiased=False)
 
-fig = plt.figure()
 
-# Draw the plot
-ax = fig.add_subplot(111)
-fig.subplots_adjust(left=0.25, bottom=0.25)
-ax.set_ylim([25, 145])
+plt.style.use('bmh')
+fig, ax = plt.subplots()
 
-startTimeSample = int(3/(time[1]-time[0]))
+Z = np.transpose(masterResultsArray[0])
+print(Z.shape)
 
-segX = segmentsXpositionArray
-masR = masterResultsArray
-lenR = len(masR)-0.5 #zabezpieczenie przed przekroczeniem indeku maks
+im = ax.imshow(Z, cmap='jet', aspect="auto",extent=[time[0],time[-1],\
+segmentsXpositionArray[0][0],segmentsXpositionArray[0][-1]], interpolation='spline16')
 
-[line] = ax.plot(tDAT(startTimeSample,1,segX, masR)[0],\
-tDAT(startTimeSample,1,segX, masR)[1],\
- linewidth=2, color='red')
-
-# Add two sliders for tweaking the parameters
-amp_slider_ax  = fig.add_axes([0.25, 0.15, 0.65, 0.03], facecolor=axis_color)
-amp_slider = Slider(amp_slider_ax, 'timeStep', 0, len(time)-1, valinit=startTimeSample)
-
-anl_slider_ax = fig.add_axes([0.25, 0.1, 0.65, 0.03], facecolor=axis_color)
-anl_slider = Slider(anl_slider_ax, 'Analiza', 0, lenR, valinit=0)
-
-ax.set_title('time='+str(round(time[int(amp_slider.val)],2))+\
-'s. BarSegments: '+str(segmentsArray[int(anl_slider.val)]))
-
-def sliders_on_changed(val):
-    line.set_xdata(tDAT(int(amp_slider.val),int(anl_slider.val),segX, masR)[0])
-    line.set_ydata(tDAT(int(amp_slider.val),int(anl_slider.val),segX, masR)[1])
-
-    ax.set_title('time='+str(round(time[int(amp_slider.val)],2))+\
-    's. BarSegments: '+str(segmentsArray[int(anl_slider.val)]))
-    fig.canvas.draw_idle()
-
-amp_slider.on_changed(sliders_on_changed)
-anl_slider.on_changed(sliders_on_changed)
-
-
+ax.set_title('TimeSpace temperature distribution')
+plt.ylabel('position [mm]')
+plt.xlabel('time [s]')
+fig.colorbar(im, orientation='vertical',label='Temperature [degC]')
 
 plt.show()

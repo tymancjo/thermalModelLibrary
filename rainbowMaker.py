@@ -1,5 +1,8 @@
+import matplotlib
+matplotlib.use('Qt5Agg') # <-- THIS MAKES IT FAST!
 import numpy as np  #to taka biblioteka z funkcjami numerycznymi jak tablice i inne takie tam
 import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
+
 from scipy.interpolate import spline
 from scipy.interpolate import InterpolatedUnivariateSpline
 
@@ -63,7 +66,7 @@ def Icw(czas, czasMin,czasMax, iRMS):
 
 #Zwektoryzujmy nasza funkcję opisująca prąd (zapiszmy jako wektor)
 Icw_vector = np.vectorize(Icw)
-current = Icw_vector(time,15,40,5e3)
+current = Icw_vector(time,15,30,5e3)
 
 
 masterResultsArray = [] # Superzestaw wszytskich wyników
@@ -142,7 +145,6 @@ def temperatureDistribution(timeSample):
 
 
 
-Z = np.transpose(masterResultsArray[0])
 
 
 plt.style.use('bmh')
@@ -157,33 +159,48 @@ title_font = { 'size':'11', 'color':'black', 'weight':'normal'} # Bottom vertica
 axis_font = { 'size':'10'}
 
 
-barSubPlot = fig.add_subplot(4,1,1)
+barSubPlot = fig.add_subplot(3,2,1)
 prepareDrawCuShape(barGeometry=copperBarGeometry,barSubPlot=barSubPlot)
 barSubPlot.set_title('Analyzed geometry', **title_font)
 plt.ylabel('height [mm]', **axis_font)
 plt.xlabel('lenght x [mm]', **axis_font)
 plt.axis('scaled')
 
-wykresIcwTime = fig.add_subplot(4,1,2)
+wykresIcwTime = fig.add_subplot(3,2,3)
 wykresIcwTime.plot(time,current)
 wykresIcwTime.set_xlim([time[0], time[-1]])
 plt.ylabel('Current [A]', **axis_font)
 plt.xlabel('Time [s]')
 
-wykresTempTime = fig.add_subplot(4,1,3)
+wykresTempTime = fig.add_subplot(3,2,5)
 wykresTempTime.plot(time,masterResultsArray[0])
 wykresTempTime.set_xlim([time[0], time[-1]])
 plt.ylabel('Temperature [degC]', **axis_font)
 #plt.xlabel('Time [s]')
 
-ax = fig.add_subplot(4,1,4)
-im = ax.imshow(Z, cmap='jet', aspect="auto",extent=[time[0],time[-1],\
-segmentsXpositionArray[0][0],segmentsXpositionArray[0][-1]], interpolation='spline16')
+#Z = np.transpose(masterResultsArray[0])
+Z = masterResultsArray[0]
+ax = fig.add_subplot(1,2,2)
+im = ax.imshow(Z, cmap='jet', aspect="auto",extent=[\
+segmentsXpositionArray[0][0],segmentsXpositionArray[0][-1],\
+time[-1],time[0]], interpolation='spline16')
 ax.set_title('TimeSpace temperature distribution', **title_font)
-plt.ylabel('Position [mm]', **axis_font)
-# plt.xlabel('Time [s]', **axis_font)
-fig.colorbar(im, orientation='horizontal',label='Temperature [degC]',alpha=0.5,\
-fraction=0.046, pad=0.2)
-fig.subplots_adjust(hspace = 0.3)
+plt.xlabel('Position [mm]', **axis_font)
+plt.ylabel('Time [s]', **axis_font)
+fig.colorbar(im, orientation='horizontal',label='Temperature [degC]',alpha=0.5)#,\
+#fraction=0.046, pad=0.2)
+# fig.subplots_adjust(hspace = 0.3)
+
+plt.tight_layout()
+# plt.show()
+
+y = np.arange(0,len(time),1)
+x = np.arange(0,len(segmentsXpositionArray[0]))
+
+fig = plt.figure()
+ax = Axes3D(fig)
+x, y = np.meshgrid(x, y)
+p = ax.plot_surface(x, y, Z, rstride=40, cstride=1, cmap='jet', antialiased=True)
+#cb = fig.colorbar(p, shrink=0.5)
 
 plt.show()
