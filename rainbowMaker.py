@@ -55,7 +55,7 @@ def prepareDrawCuShape(barGeometry,barSubPlot):
 
 
 # Zdefiniujmy sobie wektor czasu
-time = np.arange(0, 60*1, 0.01)
+time = np.arange(0, 60*60*2, 0.1)
 
 #Zdefiniujmy funkcję opisująca prąd w czasie
 def Icw(czas, czasMin,czasMax, iRMS):
@@ -66,7 +66,7 @@ def Icw(czas, czasMin,czasMax, iRMS):
 
 #Zwektoryzujmy nasza funkcję opisująca prąd (zapiszmy jako wektor)
 Icw_vector = np.vectorize(Icw)
-current = Icw_vector(time,15,30,5e3)
+current = Icw_vector(time,15,30,0)
 
 
 masterResultsArray = [] # Superzestaw wszytskich wyników
@@ -77,19 +77,13 @@ segmentsArray = []
 segmentsXpositionArray = []
 
 
-for analiza in range(5,6,1):
+for analiza in range(1,2,1):
 
 
     copperBarGeometry = np.array([\
                                   [40,10,10,0],\
                                   [40,10,15,14],\
-                                  [40,10,15-analiza,0],\
-                                  [40,10,95,0],\
-                                  [40,10,10,20],\
-                                  [40,10,95,0],\
-                                  [40,10,15-analiza,0],\
-                                  [40,10,15,14],\
-                                  [40,10,10,0],\
+                                  [40,10,150,0],\
                                   ])
     #if masterIndex > 0:
     copperBarGeometry = gml.slicer(copperBarGeometry)
@@ -100,8 +94,8 @@ for analiza in range(5,6,1):
                                geometryArray=copperBarGeometry,\
                                timeArray=time,\
                                currentArray=current,\
-                               HTC=250, Emiss=0.8,\
-                               ambientTemp=25, barStartTemperature=25,\
+                               HTC=10, Emiss=0.45,\
+                               ambientTemp=250, barStartTemperature=25,\
                                thermalConductivity=401, materialDensity=8920, materialCp=385))
 
 
