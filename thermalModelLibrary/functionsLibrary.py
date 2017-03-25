@@ -43,7 +43,7 @@ def plotCurves(timeTable,dataArray,plotName,xLabel,yLabel,curvesLabelArray):
         elif hasattr(curvesLabelArray, "__len__"):
             plotLabel = curvesLabelArray+'['+str(i)+']'
             plt.plot(timeTable, dataArray[:,i] , label=plotLabel)
-        # of if set to false - do not show labels and legend
+        # of if set to false - do not show labels and lege
         else:
             plt.plot(timeTable, dataArray[:,i])
 
