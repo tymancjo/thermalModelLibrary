@@ -5,18 +5,7 @@ import functools
 import numpy as np
 import matplotlib.pyplot as plt
 
-canvas_width = 500
-canvas_height = 500
 
-elementsInX = 10
-elementsInY = 10
-
-
-
-dX = int(canvas_width / elementsInX)
-dY = int(canvas_height / elementsInY)
-
-XSecArray = np.zeros(shape=[elementsInY,elementsInX])
 
 def checkered(canvas, line_distanceX, line_distanceY):
    # Cleaning up the whole space
@@ -28,6 +17,24 @@ def checkered(canvas, line_distanceX, line_distanceY):
    for y in range(0,canvas_height,int(line_distanceY)):
       canvas.create_line(0, y, canvas_width, y, fill="gray")
 
+def arrayVectorize(inputArray):
+    # Let's check the size of the array
+    elementsInY = inputArray.shape[0]
+    elementsInX = inputArray.shape[1]
+
+    #lets define the empty vectorArray
+    vectorArray = []
+
+    #lets go for each input array position and check if is set
+    #and if yes then put it into putput vectorArray
+    for Row in range(elementsInY):
+        for Col in range(elementsInX):
+            if inputArray[Row][Col] == 1:
+                vectorArray.append([Row,Col])
+
+    return np.array(vectorArray)
+
+
 def arraySlicer(inputArray, subDivisions):
     return inputArray.repeat(subDivisions,axis=0).repeat(subDivisions,axis=1)
 
@@ -37,13 +44,8 @@ def showXsecArray(event):
 
 def displayArrayAsImage():
     print(XSecArray)
+    print(str(dXmm)+'[mm] :'+str(dYmm)+'[mm]')
     printTheArray(XSecArray)
-
-    # plt.style.use('bmh')
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111)
-    # im = ax.imshow(XSecArray, cmap='jet', aspect="auto", interpolation='None')
-    # plt.show()
 
 def clearArrayAndDisplay():
     global XSecArray, dX, dY
@@ -52,9 +54,12 @@ def clearArrayAndDisplay():
         if q == 'yes':
             XSecArray[:] = 0
             checkered(w, dX, dY)
+            mainSetup()
     else:
             XSecArray[:] = 0
             checkered(w, dX, dY)
+            mainSetup()
+    checkered(w, dX, dY)
 
 
 def saveArrayToFile():
@@ -132,12 +137,62 @@ def printTheArray(dataArray):
             w.create_rectangle((Col)*dX, (Row)*dY, (Col)*dX+dX, (Row)*dY+dY, fill=fillColor, outline="gray")
 
 def subdivideArray():
-    global XSecArray
-    XSecArray = arraySlicer(inputArray = XSecArray, subDivisions = 2)
-    printTheArray(dataArray=XSecArray)
+    global XSecArray, dXmm, dYmm
+    if dXmm > 2.5 and dYmm > 2.5:
+        XSecArray = arraySlicer(inputArray = XSecArray, subDivisions = 2)
+
+        dXmm = dXmm/2
+        dYmm = dYmm/2
+        print(str(dXmm)+'[mm] :'+str(dYmm)+'[mm]')
+        printTheArray(dataArray=XSecArray)
+    else:
+        print('No further subdivisions make sense :)')
+
+def vectorizeTheArray():
+    global elementsVector
+    #lets check if there is anything in the xsection geom array
+    if np.sum(XSecArray) > 0:
+        elementsVector = arrayVectorize(inputArray=XSecArray)
+        print(elementsVector.shape)
+        print(elementsVector)
+
+def mainSetup():
+    global canvas_width, canvas_height, elementsInX, elementsInY, dXmm, dYmm, dX, dY, XSecArray
+    canvas_width = 500
+    canvas_height = 500
+
+    elementsInX = 20
+    elementsInY = 20
+
+    dXmm = 10
+    dYmm = 10
 
 
-########
+    dX = int(canvas_width / elementsInX)
+    dY = int(canvas_height / elementsInY)
+
+    XSecArray = np.zeros(shape=[elementsInY,elementsInX])
+
+######## End of functions definition ############
+
+
+
+# canvas_width = 500
+# canvas_height = 500
+#
+# elementsInX = 20
+# elementsInY = 20
+#
+# dXmm = 10
+# dYmm = 10
+#
+#
+# dX = int(canvas_width / elementsInX)
+# dY = int(canvas_height / elementsInY)
+#
+# XSecArray = np.zeros(shape=[elementsInY,elementsInX])
+
+mainSetup()
 
 
 master = Tk()
@@ -160,6 +215,9 @@ emptyOpis.grid(row=5, column=0,)
 
 print_button = Button(master, text='Refresh View', command=displayArrayAsImage, height=2, width=16)
 print_button.grid(row=7, column=0, padx=5, pady=5)
+
+print_button = Button(master, text='Vectorize', command=vectorizeTheArray, height=2, width=16)
+print_button.grid(row=9, column=0, padx=5, pady=5)
 
 print_button_slice = Button(master, text='Subdivide', command=subdivideArray, height=2, width=16)
 print_button_slice.grid(row=6, column=0 , padx=5, pady=5)
