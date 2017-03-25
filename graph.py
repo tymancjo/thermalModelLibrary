@@ -175,23 +175,6 @@ def mainSetup():
 
 ######## End of functions definition ############
 
-
-
-# canvas_width = 500
-# canvas_height = 500
-#
-# elementsInX = 20
-# elementsInY = 20
-#
-# dXmm = 10
-# dYmm = 10
-#
-#
-# dX = int(canvas_width / elementsInX)
-# dY = int(canvas_height / elementsInY)
-#
-# XSecArray = np.zeros(shape=[elementsInY,elementsInX])
-
 mainSetup()
 
 

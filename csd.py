@@ -199,8 +199,8 @@ emptyOpis.grid(row=5, column=0,)
 print_button = Button(master, text='Refresh View', command=displayArrayAsImage, height=2, width=16)
 print_button.grid(row=7, column=0, padx=5, pady=5)
 
-print_button = Button(master, text='Vectorize', command=vectorizeTheArray, height=2, width=16)
-print_button.grid(row=9, column=0, padx=5, pady=5)
+# print_button = Button(master, text='Vectorize', command=vectorizeTheArray, height=2, width=16)
+# print_button.grid(row=9, column=0, padx=5, pady=5)
 
 print_button_slice = Button(master, text='Subdivide', command=subdivideArray, height=2, width=16)
 print_button_slice.grid(row=6, column=0 , padx=5, pady=5)
