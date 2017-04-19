@@ -106,13 +106,13 @@ def tDAT(timeSample,analysis,xPositions,thermalResults):
 
 fig = plt.figure('Summary')
 temperatureDistribution(300)
-plt.show()
+# plt.show()
 
 
 axis_color = 'grey'
 plt.style.use('fivethirtyeight')
 
-fig = plt.figure()
+fig = plt.figure('Animation plot')
 
 # Draw the plot
 ax = fig.add_subplot(111)
@@ -150,34 +150,35 @@ amp_slider.on_changed(sliders_on_changed)
 anl_slider.on_changed(sliders_on_changed)
 
 
-plt.show()
-
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-
-# Make data.
-X = np.arange(0,len(segmentsXpositionArray[0]))
-Y = np.arange(0,len(time))
-
-X, Y = np.meshgrid(X, Y)
-
-# Plot the surface.masterResultsArray[analysis][timeSample][:]
-surf = ax.plot_surface(segmentsXpositionArray[0][X], time[Y], masterResultsArray[0][Y][X], cmap=cm.coolwarm,
-                       linewidth=0, antialiased=False)
-
-
-plt.style.use('bmh')
-fig, ax = plt.subplots()
-
-Z = np.transpose(masterResultsArray[0])
-print(Z.shape)
-
-im = ax.imshow(Z, cmap='jet', aspect="auto",extent=[time[0],time[-1],\
-segmentsXpositionArray[0][0],segmentsXpositionArray[0][-1]], interpolation='spline16')
-
-ax.set_title('TimeSpace temperature distribution')
-plt.ylabel('position [mm]')
-plt.xlabel('time [s]')
-fig.colorbar(im, orientation='vertical',label='Temperature [degC]')
 
 plt.show()
+
+# fig2 = plt.figure()
+# ax = fig2.gca(projection='3d')
+#
+# # Make data.
+# X = np.arange(0,len(segmentsXpositionArray[0]))
+# Y = np.arange(0,len(time))
+#
+# X, Y = np.meshgrid(X, Y)
+#
+# # Plot the surface.masterResultsArray[analysis][timeSample][:]
+# surf = ax.plot_surface(segmentsXpositionArray[0][X], time[Y], masterResultsArray[0][Y][X], cmap=cm.coolwarm,
+#                        linewidth=0, antialiased=False)
+#
+#
+# plt.style.use('bmh')
+# fig, ax = plt.subplots()
+#
+# Z = np.transpose(masterResultsArray[0])
+# print(Z.shape)
+#
+# im = ax.imshow(Z, cmap='jet', aspect="auto",extent=[time[0],time[-1],\
+# segmentsXpositionArray[0][0],segmentsXpositionArray[0][-1]], interpolation='spline16')
+#
+# ax.set_title('TimeSpace temperature distribution')
+# plt.ylabel('position [mm]')
+# plt.xlabel('time [s]')
+# fig.colorbar(im, orientation='vertical',label='Temperature [degC]')
+
+# plt.show()
