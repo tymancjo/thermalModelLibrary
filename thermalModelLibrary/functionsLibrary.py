@@ -141,8 +141,8 @@ def copperCp(temperatureCu):
     return 423.28-45.089*np.exp(-1*temperatureCu/192.82)
 
 def htc(temp, tempAmb, initialHTC):
-    return 0.1*initialHTC*(abs(temp - tempAmb))**0.25
-
+    # return 0.1*initialHTC*(abs(temp - tempAmb))**0.25
+    return initialHTC
 
 def generateTHermalConductance(barGeometry, thermalCOnduction):
     numberOfSegments = barGeometry.shape[0]
@@ -178,8 +178,11 @@ def getTempDistr(barGeometry, Irms, timeStep, startTemp,\
         segmentVolume = (heightBar - cutoutBar) * thickBar * lenghtBar
         segmentMass = segmentVolume * density
         barArea = lenghtBar * (2 * ((heightBar - cutoutBar)+ thickBar))
+        # adding beggning and end surface of bar
+        if i == 0 or i == numberOfSegments:
+            barArea += (heightBar - cutoutBar) * thickBar
 
-        #Thermal conduction based on the previous step tmeperatures
+        # Thermal conduction based on the previous step tmeperatures
         if i>0 and i<numberOfSegments-1:
             thermalCOnduction = ((startTemp[i]-startTemp[i-1])*thermG[i-1]+\
             (startTemp[i]-startTemp[i+1])*thermG[i])
@@ -210,6 +213,8 @@ def mainAnalysis(analysisName, geometryArray, timeArray, currentArray, \
  HTC, Emiss, thermalConductivity,materialDensity,materialCp,\
  ambientTemp,barStartTemperature):
 
+
+
     print('Starting analysis: '+ str(analysisName))
 
     #Getting the thermal conductivity array for given shape
@@ -232,10 +237,26 @@ def mainAnalysis(analysisName, geometryArray, timeArray, currentArray, \
             #currentTime = time * deltaTime
             currentTime = time
 
+            try:
+                thisStepTemperature = ambientTemp[calculationStep-1]
+            except:
+                thisStepTemperature = ambientTemp
+
+            try:
+                thisHTC = HTC[calculationStep-1]
+            except:
+                thisHTC = HTC
+
+            try:
+                currentEmiss = Emiss[calculationStep-1]
+            except:
+                currentEmiss = Emiss
+
+
             temperatures[calculationStep] = temperatures[calculationStep-1]+ \
             getTempDistr(geometryArray,\
             currentArray[calculationStep], deltaTime, temperatures[calculationStep -1] ,\
-            ambientTemp, materialDensity, materialCp, HTC ,thermalGarray, Emiss)
+            thisStepTemperature, materialDensity, materialCp, thisHTC ,thermalGarray, currentEmiss)
             #barGeometry, Irms, timeStep, startTemp,ambientTemp, density, Cp, baseHTC, thermG, emmisivity
 
             calculationStep += 1

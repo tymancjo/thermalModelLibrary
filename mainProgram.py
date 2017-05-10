@@ -6,7 +6,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 from matplotlib.widgets import Slider, Button, RadioButtons
 import matplotlib.animation as animation
 
-from mpl_toolkits.mplot3d import Axes3D
+# from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
 #importing our own library
@@ -16,37 +16,39 @@ from thermalModelLibrary import geometryLib as gml
 # Zdefiniujmy sobie wektor czasu
 time = np.arange(0, 60, 0.01)
 
-#Zdefiniujmy funkcję opisująca prąd w czasie
+# Zdefiniujmy funkcję opisująca prąd w czasie
+
+
 def Icw(czas, czasMax, iRMS):
     if czas <= czasMax:
         return iRMS
     else:
         return 0
 
-#Zwektoryzujmy nasza funkcję opisująca prąd (zapiszmy jako wektor)
+# Zwektoryzujmy nasza funkcję opisująca prąd (zapiszmy jako wektor)
+
+
 Icw_vector = np.vectorize(Icw)
-current = Icw_vector(time,3,25e3)
+current = Icw_vector(time, 3, 25e3)
 
 
-masterResultsArray = [] # Superzestaw wszytskich wyników
-masterIndex = 0 # Indeks
+masterResultsArray = []  # Superzestaw wszytskich wyników
+masterIndex = 0  # Indeks
 
 tempMaxArray = []
 segmentsArray = []
 segmentsXpositionArray = []
 
 
-for analiza in range(1,15,3):
-
-
-    copperBarGeometry = np.array([\
-                                  [40,10,10,0],\
-                                  [40,10,15,14],\
-                                  [40,10,15-analiza,0],\
-                                  [40,10,200,0],\
-                                  [40,10,15-analiza,0],\
-                                  [40,10,15,14],\
-                                  [40,10,10,0],\
+for analiza in range(1, 15, 3):
+    copperBarGeometry = np.array([
+                                  [40, 10, 10, 0],
+                                  [40, 10, 15, 14],
+                                  [40, 10, 15-analiza, 0],
+                                  [40, 10, 200, 0],
+                                  [40, 10, 15-analiza, 0],
+                                  [40, 10, 15, 14],
+                                  [40, 10, 10, 0],
                                   ])
     #if masterIndex > 0:
     copperBarGeometry = gml.slicer(copperBarGeometry)
