@@ -141,8 +141,8 @@ def copperCp(temperatureCu):
     return 423.28-45.089*np.exp(-1*temperatureCu/192.82)
 
 def htc(temp, tempAmb, initialHTC):
-    # return 0.1*initialHTC*(abs(temp - tempAmb))**0.25
-    return initialHTC
+    return initialHTC*(abs(temp - tempAmb))**0.25
+    # return initialHTC
 
 def generateTHermalConductance(barGeometry, thermalCOnduction):
     numberOfSegments = barGeometry.shape[0]
@@ -245,7 +245,8 @@ def mainAnalysis(analysisName, geometryArray, timeArray, currentArray, \
             try:
                 thisHTC = HTC[calculationStep-1]
             except:
-                thisHTC = HTC
+                # thisHTC = HTC
+                thisHTC = htc(max(temperatures[calculationStep-1]), thisStepTemperature, HTC)
 
             try:
                 currentEmiss = Emiss[calculationStep-1]

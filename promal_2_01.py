@@ -1,10 +1,10 @@
 import matplotlib
-matplotlib.use('Qt5Agg') # <-- THIS MAKES IT FAST!
+matplotlib.use('TkAgg') # <-- THIS MAKES IT FAST!
 import numpy as np  #to taka biblioteka z funkcjami numerycznymi jak tablice i inne takie tam
 import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
 
-from scipy.interpolate import spline
-from scipy.interpolate import InterpolatedUnivariateSpline
+# from scipy.interpolate import spline
+# from scipy.interpolate import InterpolatedUnivariateSpline
 
 from matplotlib.widgets import Slider, Button, RadioButtons
 import matplotlib.animation as animation
@@ -48,10 +48,10 @@ start = 2400
 end = 2500
 
 aHTC = np.ones(time.shape[0])*HTC[1]
-aHTC[:np.where(time==tx0)[0]] = np.linspace(start=HTC[0], stop=HTC[1], num=np.where(time==tx0)[0])
-aHTC[np.where(time==tx1)[0]:np.where(time==tx2)[0]]=np.linspace(start=HTC[2], stop=HTC[3],num=np.where(time==tx2)[0]-np.where(time==tx1)[0])
+aHTC[:tx0] = np.linspace(start=HTC[0], stop=HTC[1], num=np.where(time==tx0)[0])
+aHTC[tx1:tx2]=np.linspace(start=HTC[2], stop=HTC[3],num=np.where(time==tx2)[0]-np.where(time==tx1)[0])
 # aHTC[np.where(time==tx2)[0]:]=HTC[4]
-aHTC[np.where(time==tx2)[0]:]=np.linspace(start=HTC[3], stop=HTC[4],num=len(time)-np.where(time==tx2)[0])
+aHTC[tx2:]=np.linspace(start=HTC[3], stop=HTC[4],num=len(time)-np.where(time==tx2)[0])
 
 epsilon = np.ones(time.shape[0])*0.35
 # epsilon[np.where(time==tx1)[0]:]=0.4
@@ -59,8 +59,8 @@ epsilon = np.ones(time.shape[0])*0.35
 dfSrc['HTC'] = aHTC
 
 ambientTemp=np.ones(time.shape[0])*190
-ambientTemp[:np.where(time==tx0)[0]]=np.linspace(start=50, stop=190, num=np.where(time==tx0)[0])
-ambientTemp[np.where(time==tx1)[0]:]=19
+ambientTemp[:tx0]=np.linspace(start=50, stop=190, num=np.where(time==tx0)[0])
+ambientTemp[tx1:]=19
 
 ambientTemp = dfSrc['CH10']
 barStartTemp = ambientTemp[0]
