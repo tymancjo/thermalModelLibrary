@@ -64,6 +64,7 @@ barStartTemp = 20
 
 # Setting up the analysis ambient temperature
 ambientTemp = np.array(dfSrc['Ambient [$^o$C]'])
+ambientTemp[tx0:] = 20
 
 
 def analysis(HTC, HTCpow, HTClinterp, emiss):
@@ -109,8 +110,8 @@ def analysis(HTC, HTCpow, HTClinterp, emiss):
 epsilon = 0.35
 
 aHTC = np.ones(time.size) * 1 
-aHTC[tx0: tx0+75] = 1.50
-aHTC[tx0+75:] = 0.50
+# aHTC[tx0: tx0+75] = 1.50
+aHTC[tx0:] = 0.50
 # aHTC = 10
 HTCpow = 0.25
 HTClinterp = 0.0225
@@ -160,7 +161,7 @@ ax2.set_title('Comaprison Analysis vs. Promal Data \n \
                emissivity={} \n HTC=TurbulanceRatio*BarHeight*{}*(DT)^{}\n'
               .format(epsilon, HTClinterp, HTCpow))
 
-style = ['-', '-', '-', '--', '--', ':']
+style = ['-', '-', '-', '--', '--', '--']
 summary.plot(alpha=0.5, style=style, ax=ax2)
 plt.ylabel('Temperature [$^o$C]')
 
