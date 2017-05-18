@@ -36,7 +36,7 @@ dfSrc.set_index('[s]', inplace=True)
 
 wielkoscSzyn = ['30x500', '40x500', '80x300', '100x100']
 
-HTC = np.array([90, 6, 350, 70, 20])
+HTC = np.array([10, 4, 100, 30, 20])
 
 tx0 = 400
 tx1 = 2425  # czas wyjazdu z pieca
@@ -44,7 +44,7 @@ tx2 = 2445
 tx3 = 2350
 
 # Zakres czasu kreslenia
-start = 2400
+start = 0
 end = 2500
 
 aHTC = np.ones(time.shape[0])*HTC[1]

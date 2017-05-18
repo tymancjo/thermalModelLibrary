@@ -140,8 +140,8 @@ def powerLosses(xSec,Irms,temp,cond20C, thermRcoef):
 def copperCp(temperatureCu):
     return 423.28-45.089*np.exp(-1*temperatureCu/192.82)
 
-def htc(temp, tempAmb, initialHTC):
-    return initialHTC*(abs(temp - tempAmb))**0.25
+def htc(temp, tempAmb, initialHTC, HTCpow=0.25):
+    return initialHTC*(abs(temp - tempAmb))**HTCpow
     # return initialHTC
 
 def generateTHermalConductance(barGeometry, thermalCOnduction):
@@ -211,7 +211,7 @@ def getTempDistr(barGeometry, Irms, timeStep, startTemp,\
 
 def mainAnalysis(analysisName, geometryArray, timeArray, currentArray, \
  HTC, Emiss, thermalConductivity,materialDensity,materialCp,\
- ambientTemp,barStartTemperature):
+ ambientTemp,barStartTemperature,HTCpow=0.25, HTClinterp=0.03):
 
 
 
@@ -228,14 +228,16 @@ def mainAnalysis(analysisName, geometryArray, timeArray, currentArray, \
     # Setting the initial temperatures for segments
     temperatures = np.ones((numberOfSamples, numberOfSegments))*barStartTemperature
 
-    calculationStep = 1 #just the counter reset
+    heightBar = geometryArray[0][0]
+      
+    calculationStep = 1  # just the counter reset
     for time in timeArray[1:]:
-            #progress bar
-            printProgressBar(calculationStep, numberOfSamples -1, prefix = 'Progress:', \
-            suffix = 'Complete', length = 50)
+            # progress bar
+            printProgressBar(calculationStep, numberOfSamples - 1,
+                             prefix='Progress:', suffix='Complete', length=50)
 
-            #currentTime = time * deltaTime
-            currentTime = time
+            # currentTime = time * deltaTime
+            # currentTime = time
 
             try:
                 thisStepTemperature = ambientTemp[calculationStep-1]
@@ -243,22 +245,24 @@ def mainAnalysis(analysisName, geometryArray, timeArray, currentArray, \
                 thisStepTemperature = ambientTemp
 
             try:
-                thisHTC = HTC[calculationStep-1]
+                # thisHTC = HTC[calculationStep-1]
+                nHTC = HTC[calculationStep-1] * (HTClinterp * heightBar)  # Aproximation fro HTC as function of bar height in mm (experimental)
+                thisHTC = htc(max(temperatures[calculationStep-1]), thisStepTemperature, nHTC, HTCpow)
             except:
                 # thisHTC = HTC
-                thisHTC = htc(max(temperatures[calculationStep-1]), thisStepTemperature, HTC)
-
+                HTC = HTClinterp * heightBar  # Aproximation fro HTC as function of bar height in mm (experimental)
+                thisHTC = htc(max(temperatures[calculationStep-1]), thisStepTemperature, HTC, HTCpow)
+                
             try:
                 currentEmiss = Emiss[calculationStep-1]
             except:
                 currentEmiss = Emiss
 
-
-            temperatures[calculationStep] = temperatures[calculationStep-1]+ \
-            getTempDistr(geometryArray,\
-            currentArray[calculationStep], deltaTime, temperatures[calculationStep -1] ,\
-            thisStepTemperature, materialDensity, materialCp, thisHTC ,thermalGarray, currentEmiss)
-            #barGeometry, Irms, timeStep, startTemp,ambientTemp, density, Cp, baseHTC, thermG, emmisivity
+            temperatures[calculationStep] = temperatures[calculationStep-1] + \
+                getTempDistr(geometryArray, currentArray[calculationStep],
+                             deltaTime, temperatures[calculationStep - 1],
+                             thisStepTemperature, materialDensity, materialCp,
+                             thisHTC, thermalGarray, currentEmiss)
 
             calculationStep += 1
 

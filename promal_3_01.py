@@ -26,13 +26,16 @@ dfSrc.set_index('Time [s]', inplace=True)
 
 print(dfSrc.head())
 
+# dfSrc.plot()
+# plt.ylabel('Temperature [$^o$C]')
+
 bar1 = ['CH1','CH2','CH3']
 bar2 = ['CH4','CH5','CH6']
 realAmb = ['CH7','CH8','CH9','CH10']
 
-dfSrc['BAR 1'] = dfSrc[bar1].mean(axis=1)
-dfSrc['BAR 2'] = dfSrc[bar2].mean(axis=1)
-dfSrc['Real Ambient'] = dfSrc[realAmb].mean(axis=1)
+dfSrc['BAR 30x800 (promal)'] = dfSrc[bar1].mean(axis=1)
+dfSrc['BAR 100x800 (promal)'] = dfSrc[bar2].mean(axis=1)
+dfSrc['Ambient [$^o$C]'] = dfSrc[realAmb].mean(axis=1)
 
 listToDrop = bar1 + bar2 + realAmb
 
@@ -41,9 +44,10 @@ dfSrc = dfSrc.drop(listToDrop, axis=1)
 # Preparation of the analysis
 tx0 = 3570 # Starting time of cooling process
 
-# HTC is based on the formula HTC = aHTC*(Tx-Ta)**0.25
-aHTC = 1 # Heat Transfer coeff used in analysis
+# HTC is based on the formula HTC = aHTC*(Tx-Ta)**HTCpow
+aHTC = 5 # Heat Transfer coeff used in analysis
 # aHTC = np.ones(time.size) * 2
+HTCpow = 0.1
 
 # epsilov value for emissivity coeff used in radiation equation
 # epsilon = np.ones(time.shape[0])*0.35 # Set to be a vector of timesize
@@ -59,42 +63,59 @@ wielkoscSzyn = ['30x800', '100x800']
 barStartTemp = 20
 
 # Setting up the analysis ambient temperature
-ambientTemp = np.array(dfSrc['Real Ambient'])
-
-# #########################################################
-# Main analysis calculations
-masterResultsArray = [] # Superzestaw wszytskich wyników
-masterIndex = 0 # Indeks
-
-tempMaxArray = []
-segmentsArray = []
-segmentsXpositionArray = []
+ambientTemp = np.array(dfSrc['Ambient [$^o$C]'])
 
 
-for bar in wielkoscSzyn:
+def analysis(HTC, HTCpow, HTClinterp, emiss):
+    # #########################################################
+    # Main analysis calculations
 
-    bH = float(bar.split('x')[0])
-    bL = float(bar.split('x')[1])
+    masterResultsArray = []  # Superzestaw wszytskich wyników
+    # masterIndex = 0  # Indeks
 
-    copperBarGeometry = np.array([\
-                                  [bH,10,bL-10,0],\
-                                  [bH,10,10,0],\
-                                  ])
-    print('Elementów szyny: '+str(len(copperBarGeometry)))
+    # tempMaxArray = []
+    # segmentsArray = []
+    # segmentsXpositionArray = []
 
-    masterResultsArray.append(tml.mainAnalysis(
-                              analysisName='Analiza dla szyny[{}]'.format(bar),
-                              geometryArray=copperBarGeometry,
-                              timeArray=time,
-                              currentArray=current,
-                              HTC=aHTC, Emiss=epsilon,
-                              ambientTemp=ambientTemp,
-                              barStartTemperature=barStartTemp,
-                              thermalConductivity=401,
-                              materialDensity=8920,
-                              materialCp=385))
+    for bar in wielkoscSzyn:
 
-# #########################################################
+        bH = float(bar.split('x')[0])
+        bL = float(bar.split('x')[1])
+
+        copperBarGeometry = np.array([\
+                                      [bH,10,bL-10,0],\
+                                      [bH,10,10,0],\
+                                      ])
+        print('Elementów szyny: '+str(len(copperBarGeometry)))
+
+        masterResultsArray.append(tml.mainAnalysis(
+                                  analysisName='Analiza dla szyny[{}]'.format(bar),
+                                  geometryArray=copperBarGeometry,
+                                  timeArray=time,
+                                  currentArray=current,
+                                  HTC=HTC, Emiss=emiss,
+                                  ambientTemp=ambientTemp,
+                                  barStartTemperature=barStartTemp,
+                                  thermalConductivity=401,
+                                  materialDensity=8920,
+                                  materialCp=385,
+                                  HTCpow=HTCpow,
+                                  HTClinterp=HTClinterp))
+    return masterResultsArray
+    # #########################################################
+
+# Running the analysis procedure
+
+epsilon = 0.35
+
+aHTC = np.ones(time.size) * 1 
+aHTC[tx0: tx0+75] = 1.50
+aHTC[tx0+75:] = 0.50
+# aHTC = 10
+HTCpow = 0.25
+HTClinterp = 0.0225
+
+masterResultsArray = analysis(aHTC, HTCpow, HTClinterp, epsilon)
 
 # Setting up the plot time range
 start = 0
@@ -104,22 +125,24 @@ end = 10000
 
 # Gathering the analysis results and formatting it as dataframe
 masterResultsArray = np.array(masterResultsArray)
-np_array =[]
+np_array = []
 
 for x in range(masterResultsArray.shape[0]):
-    for y in range(0,masterResultsArray.shape[2],2):
-        np_array.append(masterResultsArray[x,:,y])
+    for y in range(0, masterResultsArray.shape[2], 2):
+        np_array.append(masterResultsArray[x, :, y])
 np_array = np.transpose(np_array)
 
 df = pd.DataFrame(np_array)
 df.columns = wielkoscSzyn
-df.insert(0,'Ambient Temp',ambientTemp)
-df.insert(0,'time[s]',time)
+df.insert(0, 'Ambient Temp', ambientTemp)
+df.insert(0, 'time[s]', time)
 df = df.set_index('time[s]')
+
 
 summary = dfSrc
 for bar in wielkoscSzyn:
-  summary[bar] = df[bar]
+    summary[bar] = df[bar]
+summary['TurbulanceRatio [%]'] = np.array(aHTC) * 100
 
 # ##################################################
 # Result displays starts here
@@ -128,20 +151,21 @@ plt.style.use('bmh')
 print(dfSrc.head())
 print(df.head())
 
-# dfSrc.plot()
-# plt.ylabel('Temperature [$^o$C]')
-
 # df.plot()
 # plt.ylabel('Temperature [$^o$C]')
 
 f2 = plt.figure('Analiza 2')
 ax2 = f2.add_subplot(111)
-ax2.set_title('Comaprison Analysis vs. Promal Data \n emissivity={} HTC={}'
-              .format(epsilon, aHTC))
+ax2.set_title('Comaprison Analysis vs. Promal Data \n \
+               emissivity={} \n HTC=TurbulanceRatio*BarHeight*{}*(DT)^{}\n'
+              .format(epsilon, HTClinterp, HTCpow))
 
-
-style=['-','-','-','--','--']
+style = ['-', '-', '-', '--', '--', ':']
 summary.plot(alpha=0.5, style=style, ax=ax2)
 plt.ylabel('Temperature [$^o$C]')
+
+# Plotting additional lines every 10s since tx0
+for i in range(10):
+    ax2.axvline(x=tx0 + i * 10, ls='--', linewidth=1, color='red', alpha=0.25)
 
 plt.show()
