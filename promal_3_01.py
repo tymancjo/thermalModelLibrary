@@ -1,15 +1,14 @@
 import matplotlib
-matplotlib.use('TkAgg') # <-- THIS MAKES IT FAST!
-import numpy as np  #to taka biblioteka z funkcjami numerycznymi jak tablice i inne takie tam
-import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
-
+import numpy as np  # to taka biblioteka z funkcjami numerycznymi jak macierze
+import matplotlib.pyplot as plt  # to biblioteka pozwalajaca kreślić wykresy
 import pandas as pd
 
-#importing our own library
+# importing our own library
 from thermalModelLibrary import functionsLibrary as tml
-from thermalModelLibrary import geometryLib as gml
+# from thermalModelLibrary import geometryLib as gml
 
 from os import path
+matplotlib.use('TkAgg')  # <-- THIS MAKES IT FAST!
 
 
 localDir = path.dirname(__file__)
@@ -29,9 +28,9 @@ print(dfSrc.head())
 # dfSrc.plot()
 # plt.ylabel('Temperature [$^o$C]')
 
-bar1 = ['CH1','CH2','CH3']
-bar2 = ['CH4','CH5','CH6']
-realAmb = ['CH7','CH8','CH9','CH10']
+bar1 = ['CH1', 'CH2', 'CH3']
+bar2 = ['CH4', 'CH5', 'CH6']
+realAmb = ['CH7', 'CH8', 'CH9', 'CH10']
 
 dfSrc['BAR 30x800 (promal)'] = dfSrc[bar1].mean(axis=1)
 dfSrc['BAR 100x800 (promal)'] = dfSrc[bar2].mean(axis=1)
@@ -42,10 +41,10 @@ listToDrop = bar1 + bar2 + realAmb
 dfSrc = dfSrc.drop(listToDrop, axis=1)
 
 # Preparation of the analysis
-tx0 = 3570 # Starting time of cooling process
+tx0 = 3570  # Starting time of cooling process
 
 # HTC is based on the formula HTC = aHTC*(Tx-Ta)**HTCpow
-aHTC = 5 # Heat Transfer coeff used in analysis
+aHTC = 5  # Heat Transfer coeff used in analysis
 # aHTC = np.ones(time.size) * 2
 HTCpow = 0.1
 
@@ -83,9 +82,9 @@ def analysis(HTC, HTCpow, HTClinterp, emiss):
         bH = float(bar.split('x')[0])
         bL = float(bar.split('x')[1])
 
-        copperBarGeometry = np.array([\
-                                      [bH,10,bL-10,0],\
-                                      [bH,10,10,0],\
+        copperBarGeometry = np.array([
+                                      [bH, 10, bL-10, 0],
+                                      [bH, 10, 10, 0],
                                       ])
         print('Elementów szyny: '+str(len(copperBarGeometry)))
 
@@ -109,10 +108,9 @@ def analysis(HTC, HTCpow, HTClinterp, emiss):
 
 epsilon = 0.35
 
-aHTC = np.ones(time.size) * 1 
-# aHTC[tx0: tx0+75] = 1.50
+aHTC = np.ones(time.size) * 1
 aHTC[tx0:] = 0.50
-# aHTC = 10
+# aHTC = 10  # Just in case we need one static value
 HTCpow = 0.25
 HTClinterp = 0.0225
 
