@@ -21,10 +21,10 @@ dfSrc = dfSrc.astype(float)
 
 # zapamiętanie wektora czasu do późniejszego użycia
 time = np.array(dfSrc['Time [s]'])
+print(time)
 dfSrc.set_index('Time [s]', inplace=True)
+# print(dfSrc.head())
 
-print(dfSrc.head())
-# time = np.arange(0, 2500, 1, dtype=float)
 # dfSrc.plot()
 # plt.ylabel('Temperature [$^o$C]')
 
@@ -41,7 +41,12 @@ listToDrop = bar1 + bar2 + realAmb
 dfSrc = dfSrc.drop(listToDrop, axis=1)
 
 # Preparation of the analysis
-tx0 = 2400  # Starting time of cooling process
+tx0 = 4300  # Starting time of cooling process
+
+# Setting up the plot time range
+start = 0
+end = 5000
+time = np.arange(start, end+1, 1, dtype=float)
 
 # HTC is based on the formula HTC = aHTC*(Tx-Ta)**HTCpow
 aHTC = 5  # Heat Transfer coeff used in analysis
@@ -56,20 +61,21 @@ epsilon = 0.4
 current = np.zeros(time.size)
 
 # Setting up the analysis busbars sizes
-wielkoscSzyn = ['30x800', '100x800', '100x250', '30x200', '60x500']
+wielkoscSzyn = ['30x800', '100x800']
 
 # Temperature value for bars starting point of analysis
 barStartTemp = 20
 
 # Setting up the analysis ambient temperature
-ambientTemp = np.array(dfSrc['Ambient [$^o$C]'])
-ambientTemp[:100] = np.linspace(20, 150, 100)
-ambientTemp[100:980] = np.linspace(150, 240, 980-100)
-ambientTemp[980:1600] = 240
-ambientTemp[1600:2000] = np.linspace(240, 200, 2000-1600)
+# ambientTemp = np.array(dfSrc['Ambient [$^o$C]'])
+ambientTemp = np.ones(time.size) * 20
+ambientTemp[20:150] = np.linspace(20, 170, 150-20)
+ambientTemp[150:1000] = np.linspace(170, 240, 1000-150)
+# ambientTemp[1000:1200] = 240
+ambientTemp[1000:2900] = np.linspace(240, 200, 2900-1000)
 
-ambientTemp[2000:tx0] = 200
-ambientTemp[tx0:] = 20
+ambientTemp[2900:tx0] = 200
+ambientTemp[tx0:end] = 20
 
 
 def analysis(HTC, HTCpow, HTClinterp, emiss):
@@ -119,13 +125,10 @@ aHTC = np.ones(time.size) * 1
 aHTC[tx0:] = 0.50
 # aHTC = 10  # Just in case we need one static value
 HTCpow = 0.25
-HTClinterp = [0.0225, 130]
+HTClinterp = [-0.009, 1.9]
 
 masterResultsArray = analysis(aHTC, HTCpow, HTClinterp, epsilon)
 
-# Setting up the plot time range
-start = 0
-end = 2600
 
 # Results postprocessing and preparing to display
 
@@ -144,15 +147,15 @@ df.insert(0, 'Ambient Temp', ambientTemp)
 df.insert(0, 'time[s]', time)
 df = df.set_index('time[s]')
 
-# Comment below line if you dont want real measurement data on plot
-# summary = dfSrc
+summary = dfSrc
+# Comment below line if you dont want real measurement data in plot
 summary = pd.DataFrame()
 for bar in wielkoscSzyn:
     summary[bar] = df[bar]
 summary['TurbulanceRatio [%]'] = np.array(aHTC) * 100
 summary['Analysis Ambient [$^o$C]'] = ambientTemp
-summary['dT 30x800 [K]'] = summary['30x800'] - max(summary['30x800'])
-summary['dT 100x800 [K]'] = summary['100x800'] - max(summary['100x800'])
+# summary['dT 30x800 [K]'] = summary['30x800'] - max(summary['30x800'])
+# summary['dT 100x800 [K]'] = summary['100x800'] - max(summary['100x800'])
 
 
 # ##################################################
@@ -178,6 +181,10 @@ plt.ylabel('Temperature [$^o$C]')
 # Plotting additional lines every 10s since tx0
 for i in range(10):
     ax2.axvline(x=tx0 + i * 10, ls='--', linewidth=1, color='red', alpha=0.25)
+
+for i in range(7):
+    ax2.axvline(x=0 + i * 900, ls=':', linewidth=1, color='green', alpha=0.5)
+
 
 plt.tight_layout()
 plt.show()

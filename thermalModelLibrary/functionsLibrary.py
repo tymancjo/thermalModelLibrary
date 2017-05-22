@@ -135,7 +135,7 @@ def powerLosses(xSec,Irms,temp,cond20C, thermRcoef):
 
     activeCrossSection = crossSection(xSec)
     Rdc = lenghtBar/(activeCrossSection * condAtTemp)
-    return 1*Rdc * Irms**2
+    return 1.2 * Rdc * Irms**2
 
 def copperCp(temperatureCu):
     return 423.28-45.089*np.exp(-1*temperatureCu/192.82)
@@ -211,7 +211,7 @@ def getTempDistr(barGeometry, Irms, timeStep, startTemp,\
 
 def mainAnalysis(analysisName, geometryArray, timeArray, currentArray, \
  HTC, Emiss, thermalConductivity,materialDensity,materialCp,\
- ambientTemp,barStartTemperature,HTCpow=0.25, HTClinterp=0.03):
+ ambientTemp,barStartTemperature,HTCpow=0.25, HTClinterp=[-0.03, 1.9]):
 
 
 
@@ -222,7 +222,7 @@ def mainAnalysis(analysisName, geometryArray, timeArray, currentArray, \
 
     numberOfSegments = geometryArray.shape[0]
 
-    deltaTime = timeArray[1]-timeArray[0] # getting the delta time base on the timeArray
+    deltaTime = timeArray[1]-timeArray[0]  # getting the delta time base on the timeArray
     numberOfSamples = timeArray.size
 
     # Setting the initial temperatures for segments
@@ -245,13 +245,17 @@ def mainAnalysis(analysisName, geometryArray, timeArray, currentArray, \
                 thisStepTemperature = ambientTemp
 
             try:
-                # thisHTC = HTC[calculationStep-1]
-                nHTC = HTC[calculationStep-1] * (HTClinterp * heightBar)  # Aproximation fro HTC as function of bar height in mm (experimental)
-                thisHTC = htc(max(temperatures[calculationStep-1]), thisStepTemperature, nHTC, HTCpow)
+                if HTClinterp is None:
+                    thisHTC = HTC[calculationStep-1]
+                else:
+                    nHTC = HTC[calculationStep-1] * (HTClinterp[0] * heightBar + HTClinterp[1])  # Aproximation fro HTC as function of bar height in mm (experimental)
+                    thisHTC = htc(max(temperatures[calculationStep-1]), thisStepTemperature, nHTC, HTCpow)
             except:
-                # thisHTC = HTC
-                HTC = HTClinterp * heightBar  # Aproximation fro HTC as function of bar height in mm (experimental)
-                thisHTC = htc(max(temperatures[calculationStep-1]), thisStepTemperature, HTC, HTCpow)
+                if HTClinterp is None:
+                    thisHTC = HTC
+                else:
+                    HTC = HTClinterp[0] * heightBar + HTClinterp[1] # Aproximation fro HTC as function of bar height in mm (experimental)
+                    thisHTC = htc(max(temperatures[calculationStep-1]), thisStepTemperature, HTC, HTCpow)
                 
             try:
                 currentEmiss = Emiss[calculationStep-1]
