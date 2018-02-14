@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Qt5Agg') # <-- THIS MAKES IT FAST!
+# matplotlib.use('Qt5Agg') # <-- THIS MAKES IT FAST!
 import numpy as np  #to taka biblioteka z funkcjami numerycznymi jak tablice i inne takie tam
 import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
 
