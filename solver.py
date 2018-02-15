@@ -32,7 +32,7 @@ BB = tntO.thermalElement(
 
 Elements = [Gerapid, Terminal, Connection, BB]
 
-A,B = tntS.Solver(Elements,4000,20,20,8*60*60,100, 0.025)
+A,B,s = tntS.Solver(Elements,4000,20,20,10*60*60,100, 0.01)
 
 
 # Just to have 1st dimensional reference 
@@ -46,6 +46,7 @@ b = np.array(B)
 b = b - 20
 
 print('Solution steps: {}'.format(len(t)))
+print('Solver Steps: {}'.format(s))
 
 plt.plot(t,b[:,0],'r',label="Gerapid")
 plt.plot(t,b[:,1],'b', label="Terminal")

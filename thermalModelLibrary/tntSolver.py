@@ -29,17 +29,22 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 	GlobalTemperatures = [Temperatures] # array of temperature results
 
 	Time = [0]
-
+	SolverSteps = 0
 
 	timestepValid = True  # assuming very first timestep will be ok
 	
 	while (Time[-1] <= EndTime):
 		# Main loop over time
+		SolverSteps += 1 #  to keep track how real solver iterations was done
+
 
 		if timestepValid:	
 			deltaTime = iniTimeStep # just to be ready for non cons timestep
+			proposedDeltaTime = []  # keeper for calculated new delata time reset 
 		else:
-			deltaTime /= 2 # we drop down deltatime by half
+			# deltaTime /= 2 # we drop down deltatime by half
+			deltaTime = min(proposedDeltaTime) # choosing minimumum step from previous calculations for all elements that didnt meet accuracy
+			proposedDeltaTime = []  # keeper for calculated new delata time reset 
 
 		# print('dT: {}'.format(deltaTime))  # just for debug
 
@@ -91,7 +96,16 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 
 			# in case of big temp rise we need to make timestep smaller
 			if abs(temperatureRise) > tempStepAccuracy:
-				timestepValid = False
+				timestepValid = False # Setting the flag to ignore this step
+
+				# calculating the new time step to meet the tempStepAccuracy
+				# for this element
+				newDeltaTime = 0.9 * abs((tempStepAccuracy * element.mass() * element.material.Cp) / Q)
+
+				# adding this new calculated step to array for elements in this step
+				proposedDeltaTime.append( newDeltaTime )
+				# for debug:
+				# print('[{}] : [{}] : [{}]'.format(SolverSteps, newDeltaTime, Time[-1]))
 
 			currentStepTemperatures.append(elementPrevTemp + temperatureRise)
 
@@ -103,7 +117,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 			Time.append(Time[-1] + deltaTime) #adding next time step to list
 			GlobalTemperatures.append(currentStepTemperatures)
 
-	return Time, GlobalTemperatures	
+	return Time, GlobalTemperatures, SolverSteps
 
 
 
