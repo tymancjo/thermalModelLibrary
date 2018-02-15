@@ -117,8 +117,16 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 			Time.append(Time[-1] + deltaTime) #adding next time step to list
 			GlobalTemperatures.append(currentStepTemperatures)
 
-	return Time, GlobalTemperatures, SolverSteps
+	return Time, GlobalTemperatures, SolverSteps, nodePositions(Elements)
 
 
+def nodePositions(Elements):
+    """
+    This functions return list of the positions of the each temperature point (middle of element)
+    in 1 dimension in [mm]
+    """
+    pos = [ 1000 * (0.5*Elements[x-1].shape.l + 0.5*Elements[x].shape.l) for x in range(1, len(Elements))]
+    pos.insert(0,Elements[0].shape.l/2)
+    return [sum(pos[0:x]) for x in range(1,len(pos)+1)]
 
 		

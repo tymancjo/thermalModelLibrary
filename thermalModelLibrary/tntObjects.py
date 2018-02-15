@@ -8,16 +8,17 @@ class shape:
 	height - height size in mm [y axis]
 	length - length size in mm [x axis]
 	"""
-	def __init__(self, width=10, height=100, length=100):
+	def __init__(self, width=10, height=100, length=100, n=1):
 		self.w = width * 1e-3  # im [m]
 		self.h = height * 1e-3  # im [m]
 		self.l = length * 1e-3  # im [m]
+		self.n = n  # number of elements in parralel
 
 	def xSec(self):
-		return self.w * self.h
+		return self.n * self.w * self.h
 
 	def Area(self):
-		return self.l * (2*self.w + 2*self.h)
+		return self.n * self.l * (2*self.w + 2*self.h)
 
 
 class Material:
