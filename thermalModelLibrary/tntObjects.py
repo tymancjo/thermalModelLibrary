@@ -1,24 +1,64 @@
 # this is the classes library for the themralModelingLibrary
+import math
+
 
 class shape:
 	"""docstring for shape
 	this is a class that describe cubical shape of thermal analysis element
+	this is the basic shape
+
 	input:
 	width - width size im mm [z axis]
 	height - height size in mm [y axis]
 	length - length size in mm [x axis]
 	"""
 	def __init__(self, width=10, height=100, length=100, n=1):
-		self.w = width * 1e-3  # im [m]
-		self.h = height * 1e-3  # im [m]
-		self.l = length * 1e-3  # im [m]
+		self.w = width  # im [mm]
+		self.h = height  # im [mm]
+		self.l = length  # im [mm]
 		self.n = n  # number of elements in parralel
 
 	def xSec(self):
-		return self.n * self.w * self.h
+		return self.n * self.w * 1e-3 * self.h * 1e-3
 
 	def Area(self):
-		return self.n * self.l * (2*self.w + 2*self.h)
+		return self.n * self.l * 1e-3 * (2*self.w * 1e-3 + 2*self.h * 1e-3)
+
+	def Volume(self):
+		return self.xSec() * self.l  * 1e-3
+
+	def getR(self, conductivity):
+		return self.l * 1e-3 / (self.xSec() * conductivity)
+
+
+
+class pipe:
+	"""docstring for shape
+	this is a class that describe pipe like shape of thermal analysis element
+	this is the basic shape
+	
+	input:
+	OutDiameter - outside diameter in mm
+	InDiameter - inside hole diameter in mm
+	length - length size in mm [x axis]
+	"""
+	def __init__(self, OutDiameter=10, InDiameter=100, length=100, n=1):
+		self.fi_out = OutDiameter  # im [mm]
+		self.fi_in = InDiameter  # im [mm]
+		self.l = length  # im [mm]
+		self.n = n  # number of elements in parralel
+
+	def xSec(self):
+		return self.n * ( math.pi*(0.5*self.fi_out * 1e-3)**2 - math.pi*(0.5*self.fi_in * 1e-3)**2)
+
+	def Area(self):
+		return self.n * 2 * math.pi * 0.5 * self.fi_out * 1e-3 * self.l * 1e-3
+
+	def Volume(self):
+		return self.xSec() * self.l  * 1e-3
+
+	def getR(self, conductivity):
+		return self.l * 1e-3 / (self.xSec() * conductivity)
 
 
 class Material:
@@ -60,7 +100,7 @@ class thermalElement:
 		self.emissivity = emissivity
 
 	def mass(self):
-		return self.shape.xSec() * self.shape.l * self.material.density
+		return self.shape.Volume() * self.material.density
 
 	def R(self, temperature=20):
 		"""
@@ -68,7 +108,7 @@ class thermalElement:
 		Inputs:
 		temperature - calculation temperature in degC
 		"""	
-		return self.shape.l / (self.shape.xSec() * self.material.conductivity(temperature))
+		return self.shape.getR(self.material.conductivity(temperature))
 
 	def Rth(self, temperature=20):
 		"""
@@ -76,7 +116,7 @@ class thermalElement:
 		Inputs:
 		temperature - calculation temperature in degC
 		"""	
-		return self.shape.l / (self.shape.xSec() * self.material.thermalConductivity)
+		return self.shape.getR(self.material.thermalConductivity)
 
 	def Power(self, current=0, temperature=20):
 		if self.dP:
