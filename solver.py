@@ -13,6 +13,8 @@ alteredCu = tntO.Material(thermalConductivity = 1e6)
 # Defining some handy vellues
 HTC = 5
 
+
+# Defining analysis elements objects
 Gerapid = tntO.thermalElement(
         shape = tntO.shape(10,10,10),
         HTC = 0,
@@ -40,18 +42,26 @@ BB = tntO.thermalElement(
         emissivity = 0,
         material = Cu)
 
+# Defining the analysis circuit/objects connection stream
 Elements = [Gerapid, Terminal, Connection, BB, BB, BB, BB, BB, BB, BB, BB, BB, BB]
 
+# Running the solver for
+# Geometry from Elements list
+# 4000 A
+# 20 degC ambient
+# 20 degC starting temperature
+# 4h analysis end time
+# 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
+# 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
 A,B,s, L2 = tntS.Solver(Elements,4000,20,20,4*60*60,500, 0.01)
 
+# this returns:
+#  A vector of time for each step
+#  B array of temperature rises for each element in each step
+#  s the total number of solver iterations (not neccessary the same as number of timesteps!)
+#  L2 vector of positions in [mm] for each temperature calculations point (each object middle)
 
-# Just to have 1st dimensional reference for positions
-#pos = [ 1000 * (0.5*Elements[x-1].shape.l + 0.5*Elements[x].shape.l) for x in range(1, len(Elements))]
-#pos.insert(0,Elements[0].shape.l/2)
-#L2 = [sum(pos[0:x]) for x in range(1,len(pos)+1)]
-
-
-
+# Rest is just cleaning up data for plotting
 t = np.array(A)
 t = t / (60*60)
 
