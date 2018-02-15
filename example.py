@@ -30,7 +30,7 @@ Terminal = tntO.thermalElement(
         material = Cu)
 
 Connection = tntO.thermalElement(
-        shape = tntO.shape(28,28,20,2),
+        shape = tntO.pipe(30,12.5,20,2),
         HTC = HTC,
         emissivity = 0,
         material = Cu)
