@@ -21,8 +21,11 @@ class shape:
 	def xSec(self):
 		return self.n * self.w * 1e-3 * self.h * 1e-3
 
-	def Area(self):
+	def ConvectionArea(self):
 		return self.n * self.l * 1e-3 * (2*self.w * 1e-3 + 2*self.h * 1e-3)
+
+	def RadiationArea(self):
+		return self.l * 1e-3 * (2*self.w * 1e-3 * self.n + 2*self.h * 1e-3)
 
 	def Volume(self):
 		return self.xSec() * self.l  * 1e-3
@@ -51,7 +54,10 @@ class pipe:
 	def xSec(self):
 		return self.n * ( math.pi*(0.5*self.fi_out * 1e-3)**2 - math.pi*(0.5*self.fi_in * 1e-3)**2)
 
-	def Area(self):
+	def ConvectionArea(self):
+		return self.n * 2 * math.pi * 0.5 * self.fi_out * 1e-3 * self.l * 1e-3
+
+	def RadiationArea(self):
 		return self.n * 2 * math.pi * 0.5 * self.fi_out * 1e-3 * self.l * 1e-3
 
 	def Volume(self):
@@ -132,13 +138,13 @@ class thermalElement:
 		current - current value [A]
 		Tambient - ambient temperature [deg C] if not zero result will be temperature in [deg C] otherwise will be rise in [K]
 		"""
-		return (self.Power(current,Telement) / (self.HTC * self.shape.Area())) + Tambient
+		return (self.Power(current,Telement) / (self.HTC * self.shape.ConvectionArea())) + Tambient
 	
 	def Qconv(self, Temp, Tamb):
 		"""
 		Returns the heat stream transmitted via convection
 		"""
-		return self.shape.Area() * self.HTC * (Temp - Tamb)
+		return self.shape.ConvectionArea() * self.HTC * (Temp - Tamb)
 
 	def Qrad(self, Temp, Tamb):
 		"""
@@ -148,4 +154,4 @@ class thermalElement:
         * ((startTemp[i]+273.15)**4-(ambientTemp+273.15)**4)
 		"""
 		stBoltzConst = 5.6703e-8
-		return self.shape.Area() * stBoltzConst * self.emissivity * ((Temp + 273.15)**4  - (Tamb + 273.15)**4)
+		return self.shape.RadiationArea() * stBoltzConst * self.emissivity * ((Temp + 273.15)**4  - (Tamb + 273.15)**4)
