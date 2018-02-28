@@ -125,8 +125,23 @@ def nodePositions(Elements):
     This functions return list of the positions of the each temperature point (middle of element)
     in 1 dimension in [mm]
     """
-    pos = [ 1000 * (0.5*Elements[x-1].shape.l + 0.5*Elements[x].shape.l) for x in range(1, len(Elements))]
+    pos = [ (0.5*Elements[x-1].shape.l + 0.5*Elements[x].shape.l) for x in range(1, len(Elements))]
     pos.insert(0,Elements[0].shape.l/2)
     return [sum(pos[0:x]) for x in range(1,len(pos)+1)]
+
+def nodePosXY(Elements):
+	"""
+	This returns the pairs of x,y position for each node element
+	"""
+	posX = [ 0.5*(Elements[i-1].shape.getPos()['x'] + 0.5*Elements[i].shape.getPos()['x']) for i in range(1, len(Elements))]
+	posX.insert(0, 0.5*Elements[0].shape.getPos()['x'])
+
+	posY = [ 0.5*(Elements[i-1].shape.getPos()['y'] + 0.5*Elements[i].shape.getPos()['y']) for i in range(1, len(Elements))]
+	posY.insert(0, 0.5*Elements[0].shape.getPos()['y'])
+
+	sumX = [sum(posX[0:x]) for x in range(1,len(posX)+1)] 
+	sumY = [sum(posY[0:x]) for x in range(1,len(posY)+1)] 
+
+	return [ [sumX[i], sumY[i]] for i in range(len(posY))]
 
 		

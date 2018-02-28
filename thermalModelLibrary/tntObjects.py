@@ -12,11 +12,12 @@ class shape:
 	height - height size in mm [y axis]
 	length - length size in mm [x axis]
 	"""
-	def __init__(self, width=10, height=100, length=100, n=1):
+	def __init__(self, width=10, height=100, length=100, n=1, angle=0):
 		self.w = width  # im [mm]
 		self.h = height  # im [mm]
 		self.l = length  # im [mm]
 		self.n = n  # number of elements in parralel
+		self.angle = angle * math.pi / 180  # Angle of position, 0 = flat(horizontal)
 
 	def xSec(self):
 		return self.n * self.w * 1e-3 * self.h * 1e-3
@@ -33,6 +34,11 @@ class shape:
 	def getR(self, conductivity):
 		return self.l * 1e-3 / (self.xSec() * conductivity)
 
+	def getPos(self):
+		return {
+				"x": self.l * math.cos(self.angle),
+				"y": self.l * math.sin(self.angle)
+				}
 
 
 class pipe:
@@ -45,11 +51,12 @@ class pipe:
 	InDiameter - inside hole diameter in mm
 	length - length size in mm [x axis]
 	"""
-	def __init__(self, OutDiameter=10, InDiameter=100, length=100, n=1):
+	def __init__(self, OutDiameter=10, InDiameter=100, length=100, n=1, angle=0):
 		self.fi_out = OutDiameter  # im [mm]
 		self.fi_in = InDiameter  # im [mm]
 		self.l = length  # im [mm]
 		self.n = n  # number of elements in parralel
+		self.angle = angle * math.pi / 180  # Angle of position, 0 = flat(horizontal)
 
 	def xSec(self):
 		return self.n * ( math.pi*(0.5*self.fi_out * 1e-3)**2 - math.pi*(0.5*self.fi_in * 1e-3)**2)
@@ -65,6 +72,12 @@ class pipe:
 
 	def getR(self, conductivity):
 		return self.l * 1e-3 / (self.xSec() * conductivity)
+
+	def getPos(self):
+		return {
+				"x": self.l * math.cos(self.angle),
+				"y": self.l * math.sin(self.angle)
+				}
 
 
 class Material:

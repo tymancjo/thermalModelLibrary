@@ -1,6 +1,7 @@
 # script file for thermal solver
 
 import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
+import matplotlib.patches as patches
 import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
@@ -22,7 +23,7 @@ Tambient = 20
 
 # Defining analysis elements objects
 ACB = tntO.thermalElement(
-        shape = tntO.shape(20,100,230),
+        shape = tntO.shape(20,100,230,1,90),
         HTC = HTC,
         emissivity = emmisivity,
         dP = True,
@@ -30,26 +31,26 @@ ACB = tntO.thermalElement(
         material = CuACB)
 
 BottomVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,4),
+        shape = tntO.shape(10,40,100,4,45),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 Connection = tntO.thermalElement(
-        shape = tntO.pipe(30,12.5,10,4),
+        shape = tntO.pipe(30,12.5,300,4,0),
         HTC = 0,
         emissivity = 0,
         material = Cu)
 
 
 TopVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,4),
+        shape = tntO.shape(10,40,100,4,90+45),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 # Defining the analysis circuit/objects connection stream
-Elements = [BottomVBB,BottomVBB,BottomVBB,BottomVBB,BottomVBB,
+Elements =      [BottomVBB,BottomVBB,BottomVBB,BottomVBB,BottomVBB,
                 BottomVBB,BottomVBB,BottomVBB,BottomVBB,BottomVBB,
                 Connection,
                 ACB,
@@ -106,8 +107,32 @@ print('Solution steps: {}'.format(len(t)))
 print('Solver Steps: {}'.format(s))
 print('Elements TempRises: {}'.format(b[-1,:]))
 
+XY = tntS.nodePosXY(Elements)
+print('XY', XY)
+
 
 plt.tight_layout()
+# plt.show()
+
+# Drawing the boxes on node positions
+fig1 = plt.figure('Geometry Sketch')
+ax1 = fig1.add_subplot(111, aspect='equal')
+
+for i,pos in enumerate(XY):
+        ax1.add_patch(
+            patches.Rectangle(
+                (pos[0], pos[1]),   # (x,y)
+                100,          # width
+                100,          # height
+            )
+        )
+
+        ax1.text(pos[0], pos[1], b[-1,i], fontsize=12)
+
+axes = plt.gca()
+axes.set_xlim([0,3000])
+axes.set_ylim([0,3000])
+
 plt.show()
 
 
