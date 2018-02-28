@@ -3,6 +3,7 @@
 import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
 import matplotlib.patches as patches
 import numpy as np
+import math
 
 from thermalModelLibrary import tntObjects as tntO
 from thermalModelLibrary import tntSolver as tntS
@@ -127,7 +128,7 @@ for i,pos in enumerate(XY):
             )
         )
 
-        ax1.text(pos[0], pos[1], b[-1,i], fontsize=12)
+        ax1.text(pos[0], pos[1], round(b[-1,i],2), fontsize=12)
 
 axes = plt.gca()
 axes.set_xlim([0,3000])
