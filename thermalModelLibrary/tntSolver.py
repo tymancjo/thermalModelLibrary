@@ -21,9 +21,20 @@ plan of algorithm:
 			Having the total heat in element -> calculate energy -> calculate DT
 			calculate Temperature = Previous temp + DT
 """
+# Importing external library
+import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
+import matplotlib.patches as patches
+from matplotlib.collections import PatchCollection
+import matplotlib as mpl
+import numpy as np
+import math
+
 
 def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
-	
+	# Preparing some geometry data for each node element
+	# Calculating the each node 2D position based on the Elements vector
+	XY = nodePosXY(Elements)
+
 	# preparing some variables
 	Temperatures = [T0 for x in Elements]  # array of temperatures iof elements in given timestep
 	GlobalTemperatures = [Temperatures] # array of temperature results
@@ -117,7 +128,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 			Time.append(Time[-1] + deltaTime) #adding next time step to list
 			GlobalTemperatures.append(currentStepTemperatures)
 
-	return Time, GlobalTemperatures, SolverSteps, nodePositions(Elements)
+	return Time, GlobalTemperatures, SolverSteps, nodePositions(Elements), XY
 
 
 def nodePositions(Elements):
@@ -144,4 +155,55 @@ def nodePosXY(Elements):
 
 	return [ [sumX[i], sumY[i]] for i in range(len(posY))]
 
-		
+
+def drawElements(axis, Elements, Temperatures=None):
+    """
+    This method draws a result as a defined shape 
+    """
+
+    # Checking for the temperatures
+    if len(Temperatures) == 0:
+        Temperatures = np.zeros(len(Elements))
+
+
+
+    my_patches = []
+    rx=0
+    ry=0
+    maxX = 0
+
+    for i,element in enumerate(Elements):
+            
+            
+            angle = element.shape.angle 
+
+            l = element.shape.getPos()['x']
+            h = element.shape.getPos()['y']
+
+
+            r = patches.Rectangle(
+                    (min(rx,rx+l), ry),     # (x,y)
+                    abs(max(abs(l),10)),    # width
+                    abs(max(abs(h),10)),    # height
+                )
+
+            my_patches.append(r)
+
+            rx += l
+            ry += max(abs(h),10)
+
+            if maxX < rx:
+                maxX = rx
+
+    shapes = PatchCollection(my_patches, cmap=mpl.cm.jet, alpha=0.5)
+    shapes.set_array(Temperatures)
+    axis.add_collection(shapes)
+
+    axes = plt.gca()
+    axes.set_xlim([0, maxX+100])
+    axes.set_ylim([0, ry+100])
+    axis.grid()
+    plt.ylabel('Position [mm]')
+    plt.xlabel('Position [mm]')
+
+    axis.set_title('Temp Rise Map')
