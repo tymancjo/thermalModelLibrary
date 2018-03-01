@@ -228,7 +228,7 @@ def drawElements(axis, Elements, Temperatures=None):
 
     # some matplotlib mambo jambo to make the rect
     # colored according to the temp rise
-    shapes = PatchCollection(my_patches, cmap=mpl.cm.jet, alpha=0.5)
+    shapes = PatchCollection(my_patches, cmap=mpl.cm.jet, alpha=1)
     shapes.set_array(Temperatures)
     # puttig it all into subplot
     axis.add_collection(shapes)
@@ -242,3 +242,26 @@ def drawElements(axis, Elements, Temperatures=None):
     plt.xlabel('Position [mm]')
 
     axis.set_title('Temp Rise Map')
+
+def generateList(Input):
+	"""
+	This functions return generated list of elements
+	based on the given sets.
+	Input:
+	list of object with repetitnion count for each as list of list:
+	example:
+	[(Object1, Object1_count), (Object2, Object2_count)...]
+
+	Output:
+		List of elements ready for solver
+	"""
+
+	# preparing internal emptylist
+	output = []
+
+	# the main loop
+	for set in Input:
+		for i in range(set[1]):
+			output.append(set[0])
+
+	return output

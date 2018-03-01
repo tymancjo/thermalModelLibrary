@@ -30,13 +30,13 @@ Gerapid = tntO.thermalElement(
         material = alteredCu)
 
 Terminal = tntO.thermalElement(
-        shape = tntO.shape(30,100,200),
+        shape = tntO.shape(30,100,10),
         HTC = HTC,
         emissivity = 0,
         material = Cu)
 
 Terminal2 = tntO.thermalElement(
-        shape = tntO.shape(30,100,200,1,180),
+        shape = tntO.shape(30,100,10,1,180),
         HTC = HTC,
         emissivity = 0,
         material = Cu)
@@ -55,26 +55,30 @@ Connection2 = tntO.thermalElement(
 
 
 BB = tntO.thermalElement(
-        shape = tntO.shape(10,100,300,4),
+        shape = tntO.shape(10,100,30,4),
         HTC = HTC,
         emissivity = 0,
         material = Cu)
 
 BB2 = tntO.thermalElement(
-        shape = tntO.shape(10,100,300,4,180),
+        shape = tntO.shape(10,100,30,4,180),
         HTC = HTC,
         emissivity = 0,
         material = Cu)
 
 # Defining the analysis circuit/objects connection stream
 # Elements = [BB2,BB2,BB2,Connection2, Terminal2, Gerapid, Terminal, Connection, BB, BB, BB]
-Elements = [BB,BB,BB,
-            Connection,
-            Terminal,
-            Gerapid,
-            Terminal2,
-            Connection2,
-            BB2, BB2, BB2]
+
+# using auto generator for input list based on tuples
+Elements = [(BB, 20),
+            (Connection, 1),
+            (Terminal, 20),
+            (Gerapid, 1),
+            (Terminal2, 20),
+            (Connection2, 1),
+            (BB2, 20)]
+
+Elements = tntS.generateList(Elements)            
 
 # Running the solver for
 # Geometry from Elements list

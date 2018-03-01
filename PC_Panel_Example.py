@@ -36,13 +36,13 @@ ACB = tntO.thermalElement(
         material = CuACB)
 
 VBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,4,90),
+        shape = tntO.shape(10,40,25,4,90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 BottomVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,4,15),
+        shape = tntO.shape(10,40,25,4,15),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
@@ -61,19 +61,23 @@ Connection2 = tntO.thermalElement(
 
 
 TopVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,4,180 - 15),
+        shape = tntO.shape(10,40,25,4,180 - 15),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 # Defining the analysis circuit/objects connection stream
-Elements =      [BottomVBB,BottomVBB,BottomVBB,BottomVBB,BottomVBB,
-                VBB, VBB, VBB,
-                Connection,
-                ACB,ACB,ACB,ACB,
-                Connection2,
-                VBB, VBB, VBB,
-                TopVBB,TopVBB,TopVBB,TopVBB,TopVBB]
+Elements =      [(VBB, 10),
+                (BottomVBB, 20),
+                (VBB, 10),
+                (Connection, 1),
+                (ACB, 4),
+                (Connection2, 1),
+                (TopVBB, 20),
+                (VBB, 20)
+                ]
+
+Elements = tntS.generateList(Elements) 
 
 # Running the solver for
 # Geometry from Elements list
