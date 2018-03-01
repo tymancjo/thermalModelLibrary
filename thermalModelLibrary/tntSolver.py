@@ -170,7 +170,11 @@ def drawElements(axis, Elements, Temperatures=None):
     my_patches = []
     rx=0
     ry=0
+
+    maxY = 0
     maxX = 0
+    minX = 0
+    minY = 0
 
     for i,element in enumerate(Elements):
             
@@ -180,28 +184,40 @@ def drawElements(axis, Elements, Temperatures=None):
             l = element.shape.getPos()['x']
             h = element.shape.getPos()['y']
 
+            shapeW = abs(math.sin(element.shape.angle)) * element.shape.h
+            shapeH = abs(math.cos(element.shape.angle)) * element.shape.h
+
 
             r = patches.Rectangle(
                     (min(rx,rx+l), ry),     # (x,y)
-                    abs(max(abs(l),10)),    # width
-                    abs(max(abs(h),10)),    # height
+                    abs(max(abs(l)+shapeW,10)),    # width
+                    abs(max(abs(h)+shapeH,10)),    # height
                 )
 
             my_patches.append(r)
 
             rx += l
-            ry += max(abs(h),10)
+            ry += h
 
             if maxX < rx:
                 maxX = rx
+                
+            if maxY < ry:
+            	maxY = ry
+            
+            if minX > rx:
+                minX = rx
+
+            if minY > ry:
+            	minY = ry
 
     shapes = PatchCollection(my_patches, cmap=mpl.cm.jet, alpha=0.5)
     shapes.set_array(Temperatures)
     axis.add_collection(shapes)
 
     axes = plt.gca()
-    axes.set_xlim([0, maxX+100])
-    axes.set_ylim([0, ry+100])
+    axes.set_xlim([minX-100, maxX+100])
+    axes.set_ylim([minY-100, maxY+100])
     axis.grid()
     plt.ylabel('Position [mm]')
     plt.xlabel('Position [mm]')
