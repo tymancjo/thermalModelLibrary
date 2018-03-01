@@ -166,39 +166,54 @@ def drawElements(axis, Elements, Temperatures=None):
         Temperatures = np.zeros(len(Elements))
 
 
-
+    # Preparing some data needed for matplotlib draw
+    #list of particylar shapes
     my_patches = []
+
+    # initial position of first element
     rx=0
     ry=0
 
+    # initial values for plot bondary
     maxY = 0
     maxX = 0
     minX = 0
     minY = 0
 
-    for i,element in enumerate(Elements):
+    for element in Elements:
+    	#  going for each element 
             
-            
+            # gatherin data from element shape geometry
             angle = element.shape.angle 
+            # this is usefull for propper placing in Y
+            cosin = abs(math.cos(angle))
 
             l = element.shape.getPos()['x']
             h = element.shape.getPos()['y']
 
+            # figuring out the shape size to draw
             shapeW = abs(math.sin(element.shape.angle)) * element.shape.h
             shapeH = abs(math.cos(element.shape.angle)) * element.shape.h
+            # reusing the same variables (recycling) :)
+            shapeW = abs(max(abs(l)+shapeW,10))
+            shapeH = abs(max(abs(h)+shapeH,10))
 
-
+            # Drawig the rectangle
             r = patches.Rectangle(
-                    (min(rx,rx+l), ry),     # (x,y)
-                    abs(max(abs(l)+shapeW,10)),    # width
-                    abs(max(abs(h)+shapeH,10)),    # height
+                    (min(rx,rx+l), ry - cosin*(shapeH/2)),     # (x,y)
+                    shapeW,				    # width
+                    shapeH,    				# height
                 )
-
+            # Adding the rectangle shape into array
+            # to display it later on plot
             my_patches.append(r)
 
+            # updating the x & y position for next element
             rx += l
             ry += h
 
+            # checking for the graph limits
+            # and updating if this element push them
             if maxX < rx:
                 maxX = rx
                 
@@ -211,10 +226,14 @@ def drawElements(axis, Elements, Temperatures=None):
             if minY > ry:
             	minY = ry
 
+    # some matplotlib mambo jambo to make the rect
+    # colored according to the temp rise
     shapes = PatchCollection(my_patches, cmap=mpl.cm.jet, alpha=0.5)
     shapes.set_array(Temperatures)
+    # puttig it all into subplot
     axis.add_collection(shapes)
 
+    # final 
     axes = plt.gca()
     axes.set_xlim([minX-100, maxX+100])
     axes.set_ylim([minY-100, maxY+100])
