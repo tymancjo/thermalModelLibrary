@@ -1,13 +1,16 @@
 # script file for thermal solver
+# for performance measurement
+from datetime import datetime
+startTime = datetime.now()
 
 import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
-import matplotlib.patches as patches
-from matplotlib.collections import PatchCollection
-import matplotlib as mpl
+# import matplotlib.patches as patches
+# from matplotlib.collections import PatchCollection
+# import matplotlib as mpl
 import numpy as np
-import math
+# import math
 
-import numpy as np
+# import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
 from thermalModelLibrary import tntSolver as tntS
@@ -96,6 +99,9 @@ A,B,s, L2, XY = tntS.Solver(Elements,2500,Tambient,Tambient,5*60*60,500, 0.1)
 #  L2 vector of positions in [mm] for each temperature calculations point (each object middle)
 #  XY - vector of 2D vectors of XY position of each node
 
+print('time steps: ', len(A))
+print('solver steps: ', s)
+print('thermal nodes: ', len(Elements))
 
 # Rest is just cleaning up data for plotting
 t = np.array(A)
@@ -135,5 +141,7 @@ tntS.drawElements(ax3,Elements,np.array(b[-1,:]))
 
 plt.tight_layout()
 plt.show()
+
+print('execution time: ', datetime.now() - startTime)
 
 
