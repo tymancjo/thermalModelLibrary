@@ -32,6 +32,9 @@ import math
 # to be able to make the deep copy of each object 
 import copy
 
+# self made library for Air model
+from thermalModelLibrary import tntAir as tntA
+
 
 def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
 	# Preparing some geometry data for each node element
@@ -42,9 +45,14 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 	# we will use this same loop as well to check if all elements have already T set
 	elementsHaveT = True
 
+	# and we will capture maxY value
+	maxY = 0
 	for index, element in enumerate(Elements):
 		element.x = XY[index][0]
 		element.y = XY[index][1]
+		
+		maxY = max(maxY, element.y)
+		
 		if not element.T:
 			elementsHaveT = False
 
@@ -67,7 +75,22 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 		print('Tamb is a function')
 		useF = True
 	else:
-		useF = False
+		# we create air based on library
+		useF = True
+		air = tntA.airObject( 20, 1.5*maxY, Tamb)
+
+		for element in Elements:
+			air.addQ(element.y, element.Power(current, Tamb))
+
+		air.solveT() # updating the Air temperature dist
+		print(air.aCellsT)
+		Tamb = air.T
+
+		# for now, we just solve the air once before everything
+		# based only on the internal heat generation
+		# later plan: do it on each step
+		# or mabe Lets start from this second plan :)
+
 
 
 	Time = [0]
@@ -94,6 +117,11 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 
 		timestepValid = True  # assuming this timestep will be ok
 		index = 0
+
+		# air.solveT() # updating the Air temperature dist
+		# air.resetQ() # clearing the air Qinput vector
+		# print(air.aCellsT)
+
 		for element in Elements:
 			# Getting the Tamb for this element:
 			# Depending if this given by function of y or just value
@@ -108,7 +136,12 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 			# solve for internal heat generaion
 			Q = element.Power(current, elementPrevTemp)
 			# solving for the convection heat taken out
-			Q -= element.Qconv(elementPrevTemp, elementTamb)
+			Qconv = element.Qconv(elementPrevTemp, elementTamb)
+			Q -= Qconv
+			# preparing for Air update basd on Qconv for all elements
+			# air.addQ(element.y, Qconv)
+			# this is disabled becouse was unstable
+
 			#  solving for the radiation heat taken out
 			Q -= element.Qrad(elementPrevTemp, elementTamb)
 
@@ -172,7 +205,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 	for index, element in enumerate(Elements):
 		element.T = GlobalTemperatures[-1][index]
 
-	return Time, GlobalTemperatures, SolverSteps, nodePositions(Elements), XY
+	return Time, GlobalTemperatures, SolverSteps, nodePositions(Elements), XY, air
 
 
 def nodePositions(Elements):

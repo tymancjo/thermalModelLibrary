@@ -14,6 +14,7 @@ import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
 from thermalModelLibrary import tntSolver as tntS
+from thermalModelLibrary import tntAir as tntA
 
 # Defining some materials
 Cu = tntO.Material(alpha=0)
@@ -83,7 +84,7 @@ Elements = [(BB, 20),
 
 Elements = tntS.generateList(Elements)            
 
-
+air = tntA.airObject(10,2000,20)
 
 
 def calcThis(T0, Ta=20, Th=1):
@@ -107,7 +108,7 @@ def calcThis(T0, Ta=20, Th=1):
     # 4h analysis end time
     # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
     # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-    A,B,s, L2, XY= tntS.Solver(Elements,4000,Ta,T0,Th*60*60,500, 0.01)
+    A,B,s, L2, XY, air = tntS.Solver(Elements,4000,Ta,T0,Th*60*60,500, 0.01)
 
     # this returns:
     #  A vector of time for each step
@@ -136,16 +137,16 @@ def calcThis(T0, Ta=20, Th=1):
     fig = plt.figure('Temperature Rise Analysis ')
 
     # first subplot for the timecurves
-    ax1 = fig.add_subplot(221)
+    ax1 = fig.add_subplot(231)
     ax1.plot(t,b[:,:])
     ax1.set_title('Temp Rise vs. Time')
     plt.ylabel('Temp Rise [K]')
     plt.xlabel('Time [h]')
 
     # Temperature rises from lats timepoint along the 1D model length
-    ax2 = fig.add_subplot(223)
+    ax2 = fig.add_subplot(234)
 
-    ax2.plot(L2,b[-1,:],'bx--')
+    ax2.plot(L2,b[-1,:],'rx--')
     ax2.set_title('Temp Rise vs. 1D position')
     plt.ylabel('Temp Rise [K]')
     plt.xlabel('Position [mm]')
@@ -154,17 +155,19 @@ def calcThis(T0, Ta=20, Th=1):
     ax2.grid()
 
     # Defining the subplot for geometry heat map
-    ax3 = fig.add_subplot(122, aspect='equal')
+    ax3 = fig.add_subplot(132, aspect='equal')
     # runs the defined procedure on this axis
     boxes = tntS.drawElements(ax3,Elements,np.array(b[-1,:]))
+
+    ax4 = fig.add_subplot(133)
+    ax4.plot(air.aCellsT, np.linspace(0,air.h,air.n) ,'b--')
+    ax4.set_title('Air Temp vs. height')
+    plt.xlabel('Air Temp [degC]')
+    plt.ylabel('Height [mm]')
 
     plt.tight_layout()
     plt.show()
 
-
-    print('execution time: ', datetime.now() - startTime)
-
-    
     return B,t
 
 def ambientT(y, T0 = 20):
@@ -174,4 +177,4 @@ def ambientT(y, T0 = 20):
     """
     return T0 + y * (3/100)
 
-B,t = calcThis(20, ambientT, 1)
+B,t = calcThis(20, 20, 4)
