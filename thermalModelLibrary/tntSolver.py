@@ -29,15 +29,46 @@ import matplotlib as mpl
 import numpy as np
 import math
 
+# to be able to make the deep copy of each object 
+import copy
+
 
 def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
 	# Preparing some geometry data for each node element
 	# Calculating the each node 2D position based on the Elements vector
 	XY = nodePosXY(Elements)
+	# putting the elements positions into elements
+	# this will be helpfull for any specific handling and drawing results
+	# we will use this same loop as well to check if all elements have already T set
+	elementsHaveT = True
+
+	for index, element in enumerate(Elements):
+		element.x = XY[index][0]
+		element.y = XY[index][1]
+		if not element.T:
+			elementsHaveT = False
+
+	# Checking if Elements have already a internal temperature not eq to Null
+	# if yes then use this as starting temperature (this allows continue calc from previous results)
+	# if no - we assume the T0
+
+	if elementsHaveT:
+		Temperatures = [x.T for x in Elements]  # array of temperatures iof elements in given timestep
+	else:
+		Temperatures = [T0 for x in Elements]  # array of temperatures iof elements in given timestep
 
 	# preparing some variables
-	Temperatures = [T0 for x in Elements]  # array of temperatures iof elements in given timestep
 	GlobalTemperatures = [Temperatures] # array of temperature results
+
+	# Checking if the delivered Tamb is a function or a value
+	# if it is a function, each element will have Tamb = f(element y position)
+	# else is just a value 
+	if callable(Tamb):
+		print('Tamb is a function')
+		useF = True
+	else:
+		useF = False
+
 
 	Time = [0]
 	SolverSteps = 0
@@ -64,14 +95,22 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 		timestepValid = True  # assuming this timestep will be ok
 		index = 0
 		for element in Elements:
+			# Getting the Tamb for this element:
+			# Depending if this given by function of y or just value
+			if useF:
+				elementTamb = Tamb(element.y)
+			else:
+				elementTamb = Tamb
+
+
 			# capturing the previous element temperature
 			elementPrevTemp = GlobalTemperatures[-1][index]
 			# solve for internal heat generaion
 			Q = element.Power(current, elementPrevTemp)
 			# solving for the convection heat taken out
-			Q -= element.Qconv(elementPrevTemp, Tamb)
+			Q -= element.Qconv(elementPrevTemp, elementTamb)
 			#  solving for the radiation heat taken out
-			Q -= element.Qrad(elementPrevTemp, Tamb)
+			Q -= element.Qrad(elementPrevTemp, elementTamb)
 
 			# solving the conduction heat transfer
 			# if we are not the forst on ein te list
@@ -127,6 +166,11 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 		if timestepValid: #  only if we take this step as valid one
 			Time.append(Time[-1] + deltaTime) #adding next time step to list
 			GlobalTemperatures.append(currentStepTemperatures)
+
+	# Putting the last step temperatures into elements internal T variable
+	# to make all results bounded with the elements and make it visible outside function
+	for index, element in enumerate(Elements):
+		element.T = GlobalTemperatures[-1][index]
 
 	return Time, GlobalTemperatures, SolverSteps, nodePositions(Elements), XY
 
@@ -243,6 +287,8 @@ def drawElements(axis, Elements, Temperatures=None):
 
     axis.set_title('Temp Rise Map')
 
+    return my_patches
+
 def generateList(Input):
 	"""
 	This functions return generated list of elements
@@ -262,6 +308,7 @@ def generateList(Input):
 	# the main loop
 	for set in Input:
 		for i in range(set[1]):
-			output.append(set[0])
+			output.append(copy.deepcopy(set[0]))
 
 	return output
+

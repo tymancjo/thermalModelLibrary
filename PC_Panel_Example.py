@@ -82,66 +82,89 @@ Elements =      [(VBB, 10),
 
 Elements = tntS.generateList(Elements) 
 
-# Running the solver for
-# Geometry from Elements list
-# 2500 A
-# 20 degC ambient
-# 20 degC starting temperature
-# 5h analysis end time
-# 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
-# 1K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-A,B,s, L2, XY = tntS.Solver(Elements,2500,Tambient,Tambient,5*60*60,500, 0.1)
+def calcThis(T0, Ta=20, Th=1):
+    """
+    Inputs:
+        T0 - initial temperature, will be ignored if elements aready have internal temp
+        Ta - ambient temperature as value or function of height Tamb = f(y[mm])
+        Th - analysis time [h]
 
-# this returns:
-#  A vector of time for each step
-#  B array of temperature rises for each element in each step
-#  s the total number of solver iterations (not neccessary the same as number of timesteps!)
-#  L2 vector of positions in [mm] for each temperature calculations point (each object middle)
-#  XY - vector of 2D vectors of XY position of each node
+    Output:
+        B,t
+            B - array of temperatures for eachTimestep and element
+            t - vector of time
+    """
+    
+    # Running the solver for
+    # Geometry from Elements list
+    # 4000 A
+    # 20 degC ambient
+    # 20 degC starting temperature
+    # 4h analysis end time
+    # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
+    # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
+    A,B,s, L2, XY= tntS.Solver(Elements,2500,Ta,T0,Th*60*60,500, 0.01)
 
-print('time steps: ', len(A))
-print('solver steps: ', s)
-print('thermal nodes: ', len(Elements))
-
-# Rest is just cleaning up data for plotting
-t = np.array(A)
-t = t / (60*60) # Time in hours
-
-# preparing tem rises as results
-b = np.array(B)
-b = b - Tambient
-
-
-# defining the main plot window
-fig = plt.figure('Temperature Rise Analysis ')
-
-# first subplot for the timecurves
-ax1 = fig.add_subplot(221)
-ax1.plot(t,b[:,:])
-ax1.set_title('Temp Rise vs. Time')
-plt.ylabel('Temp Rise [K]')
-plt.xlabel('Time [h]')
-
-# Temperature rises from lats timepoint along the 1D model length
-ax2 = fig.add_subplot(223)
-
-ax2.plot(L2,b[-1,:],'bx--')
-ax2.set_title('Temp Rise vs. 1D position')
-plt.ylabel('Temp Rise [K]')
-plt.xlabel('Position [mm]')
-
-ax1.grid()
-ax2.grid()
-
-# Defining the subplot for geometry heat map
-ax3 = fig.add_subplot(122, aspect='equal')
-# runs the defined procedure on this axis
-tntS.drawElements(ax3,Elements,np.array(b[-1,:]))
+    # this returns:
+    #  A vector of time for each step
+    #  B array of temperature rises for each element in each step
+    #  s the total number of solver iterations (not neccessary the same as number of timesteps!)
+    #  L2 vector of positions in [mm] for each temperature calculations point (each object middle)
+    #  XY - vector of 2D vectors of XY position of each node
 
 
-plt.tight_layout()
-plt.show()
+    print('execution time: ', datetime.now() - startTime)
+    print('time steps: ', len(A))
+    print('solver steps: ', s)
+    print('thermal nodes: ', len(Elements))
 
-print('execution time: ', datetime.now() - startTime)
+
+    # Rest is just cleaning up data for plotting
+    t = np.array(A)
+    t = t / (60*60) # Time in hours
+
+    # preparing tem rises as results
+    b = np.array(B)
+    b = b - 20
 
 
+    # defining the main plot window
+    fig = plt.figure('Temperature Rise Analysis ')
+
+    # first subplot for the timecurves
+    ax1 = fig.add_subplot(221)
+    ax1.plot(t,b[:,:])
+    ax1.set_title('Temp Rise vs. Time')
+    plt.ylabel('Temp Rise [K]')
+    plt.xlabel('Time [h]')
+
+    # Temperature rises from lats timepoint along the 1D model length
+    ax2 = fig.add_subplot(223)
+
+    ax2.plot(L2,b[-1,:],'bx--')
+    ax2.set_title('Temp Rise vs. 1D position')
+    plt.ylabel('Temp Rise [K]')
+    plt.xlabel('Position [mm]')
+
+    ax1.grid()
+    ax2.grid()
+
+    # Defining the subplot for geometry heat map
+    ax3 = fig.add_subplot(122, aspect='equal')
+    # runs the defined procedure on this axis
+    boxes = tntS.drawElements(ax3,Elements,np.array(b[-1,:]))
+
+    plt.tight_layout()
+    plt.show()
+
+    return B,t
+
+# Function that describe ambient change with height
+def ambientT(y, Q=0, T0 = 20):
+    """
+    y - in mmm
+    output in degC
+    """
+    return T0 + y * (3/100)
+
+B,t = calcThis(20, ambientT, 5)

@@ -120,6 +120,7 @@ class thermalElement:
 		self.emissivity = emissivity
 		self.x = None
 		self.y = None 
+		self.T = False
 
 
 	def mass(self):
