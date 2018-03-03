@@ -57,7 +57,8 @@ class airObject(object):
 		# function returning the temperature at given height
 		return self.aCellsT[self.airCell(Y)]
 
-	def setG(self, Gup=5, Gdwn=0.01, Gout=1):
+	def setG(self, Gup=5, Gdwn=1, Gout=1):
+	# def setG(self, Gup=0, Gdwn=0, Gout=1):
 		# Gup is thermal cond to the top
 		# Gdwn is thermal cond down
 		# Gout is thermal cond out of system
@@ -79,7 +80,7 @@ class airObject(object):
 
 
 
-	def solveT(self):
+	def solveT(self, srt=True):
 		"""
 		this is about update internal T solve
 		Q is the input power vector or lenght n
@@ -87,7 +88,8 @@ class airObject(object):
 		"""
 		dT = np.matmul(self.invG, self.Q)
 		self.aCellsT = dT + self.T0
-		self.aCellsT = np.sort(self.aCellsT)
+		if srt:
+			self.aCellsT = np.sort(self.aCellsT)
 		
 		
 

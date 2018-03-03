@@ -160,7 +160,11 @@ def calcThis(T0, Ta=20, Th=1):
     boxes = tntS.drawElements(ax3,Elements,np.array(b[-1,:]))
 
     ax4 = fig.add_subplot(133)
-    ax4.plot(air.aCellsT, np.linspace(0,air.h,air.n) ,'b--')
+    if air:
+        ax4.plot(air.aCellsT, np.linspace(0,air.h,air.n) ,'b--')
+    else:
+        ax4.plot(np.array([Ta(y) for y in np.linspace(0,max(L2),20)]), np.linspace(0,max(L2),20) ,'b--')
+
     ax4.set_title('Air Temp vs. height')
     plt.xlabel('Air Temp [degC]')
     plt.ylabel('Height [mm]')

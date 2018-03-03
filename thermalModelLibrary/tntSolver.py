@@ -50,9 +50,8 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 	for index, element in enumerate(Elements):
 		element.x = XY[index][0]
 		element.y = XY[index][1]
-		
 		maxY = max(maxY, element.y)
-		
+
 		if not element.T:
 			elementsHaveT = False
 
@@ -74,15 +73,16 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 	if callable(Tamb):
 		print('Tamb is a function')
 		useF = True
+		air = None
 	else:
 		# we create air based on library
 		useF = True
-		air = tntA.airObject( 20, 1.5*maxY, Tamb)
+		air = tntA.airObject( 20, 1.1 * maxY, Tamb)
 
 		for element in Elements:
 			air.addQ(element.y, element.Power(current, Tamb))
 
-		air.solveT() # updating the Air temperature dist
+		air.solveT(1) # updating the Air temperature dist 1- sorted 0-unsorted by values from top
 		print(air.aCellsT)
 		Tamb = air.T
 
@@ -221,10 +221,10 @@ def nodePosXY(Elements):
 	"""
 	This returns the pairs of x,y position for each node element
 	"""
-	posX = [ 0.5*(Elements[i-1].shape.getPos()['x'] + 0.5*Elements[i].shape.getPos()['x']) for i in range(1, len(Elements))]
+	posX = [ (0.5*Elements[i-1].shape.getPos()['x'] + 0.5*Elements[i].shape.getPos()['x']) for i in range(1, len(Elements))]
 	posX.insert(0, 0.5*Elements[0].shape.getPos()['x'])
 
-	posY = [ 0.5*(Elements[i-1].shape.getPos()['y'] + 0.5*Elements[i].shape.getPos()['y']) for i in range(1, len(Elements))]
+	posY = [ (0.5*Elements[i-1].shape.getPos()['y'] + 0.5*Elements[i].shape.getPos()['y']) for i in range(1, len(Elements))]
 	posY.insert(0, 0.5*Elements[0].shape.getPos()['y'])
 
 	sumX = [sum(posX[0:x]) for x in range(1,len(posX)+1)] 
