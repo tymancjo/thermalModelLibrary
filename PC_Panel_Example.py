@@ -180,4 +180,4 @@ def ambientT(y, Q=0, T0 = 20):
 def consT(y):
     return 20
 
-B,t = calcThis(20, consT, 4)
+B,t = calcThis(20, 20, 4)

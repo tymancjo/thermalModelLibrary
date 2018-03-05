@@ -29,7 +29,7 @@ import matplotlib as mpl
 import numpy as np
 import math
 
-# to be able to make the deep copy of each object 
+# to be able to make the deep copy of each object
 import copy
 
 # self made library for Air model
@@ -69,7 +69,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 
 	# Checking if the delivered Tamb is a function or a value
 	# if it is a function, each element will have Tamb = f(element y position)
-	# else is just a value 
+	# else is just a value
 	if callable(Tamb):
 		print('Tamb is a function')
 		useF = True
@@ -97,23 +97,23 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 	SolverSteps = 0
 
 	timestepValid = True  # assuming very first timestep will be ok
-	
+
 	while (Time[-1] <= EndTime):
 		# Main loop over time
 		SolverSteps += 1 #  to keep track how real solver iterations was done
 
 
-		if timestepValid:	
+		if timestepValid:
 			deltaTime = iniTimeStep # just to be ready for non cons timestep
-			proposedDeltaTime = []  # keeper for calculated new delata time reset 
+			proposedDeltaTime = []  # keeper for calculated new delata time reset
 		else:
 			# deltaTime /= 2 # we drop down deltatime by half
 			deltaTime = min(proposedDeltaTime) # choosing minimumum step from previous calculations for all elements that didnt meet accuracy
-			proposedDeltaTime = []  # keeper for calculated new delata time reset 
+			proposedDeltaTime = []  # keeper for calculated new delata time reset
 
 		# print('dT: {}'.format(deltaTime))  # just for debug
 
-		currentStepTemperatures = [] # empty array to keep this timestep 
+		currentStepTemperatures = [] # empty array to keep this timestep
 
 		timestepValid = True  # assuming this timestep will be ok
 		index = 0
@@ -227,15 +227,15 @@ def nodePosXY(Elements):
 	posY = [ (0.5*Elements[i-1].shape.getPos()['y'] + 0.5*Elements[i].shape.getPos()['y']) for i in range(1, len(Elements))]
 	posY.insert(0, 0.5*Elements[0].shape.getPos()['y'])
 
-	sumX = [sum(posX[0:x]) for x in range(1,len(posX)+1)] 
-	sumY = [sum(posY[0:x]) for x in range(1,len(posY)+1)] 
+	sumX = [sum(posX[0:x]) for x in range(1,len(posX)+1)]
+	sumY = [sum(posY[0:x]) for x in range(1,len(posY)+1)]
 
 	return [ [sumX[i], sumY[i]] for i in range(len(posY))]
 
 
 def drawElements(axis, Elements, Temperatures=None):
     """
-    This method draws a result as a defined shape 
+    This method draws a result as a defined shape
     """
 
     # Checking for the temperatures
@@ -258,10 +258,10 @@ def drawElements(axis, Elements, Temperatures=None):
     minY = 0
 
     for element in Elements:
-    	#  going for each element 
-            
+    	#  going for each element
+
             # gatherin data from element shape geometry
-            angle = element.shape.angle 
+            angle = element.shape.angle
             # this is usefull for propper placing in Y
             cosin = abs(math.cos(angle))
 
@@ -293,10 +293,10 @@ def drawElements(axis, Elements, Temperatures=None):
             # and updating if this element push them
             if maxX < rx:
                 maxX = rx
-                
+
             if maxY < ry:
             	maxY = ry
-            
+
             if minX > rx:
                 minX = rx
 
@@ -310,7 +310,7 @@ def drawElements(axis, Elements, Temperatures=None):
     # puttig it all into subplot
     axis.add_collection(shapes)
 
-    # final 
+    # final
     axes = plt.gca()
     axes.set_xlim([minX-100, maxX+100])
     axes.set_ylim([minY-100, maxY+100])
@@ -344,4 +344,3 @@ def generateList(Input):
 			output.append(copy.deepcopy(set[0]))
 
 	return output
-

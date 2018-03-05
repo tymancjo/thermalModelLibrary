@@ -31,12 +31,31 @@ BB = tntO.thermalElement(
         emissivity = emmisivity,
         material = Cu)
 
+MD = tntO.thermalElement(
+        shape = tntO.shape(10,100,20,1,90),
+        HTC = 0,
+        emissivity = 0,
+        source = 100,
+        dP = False,
+        material = Cu)
 
 
 # Defining the analysis circuit/objects connection stream
 
 # using auto generator for input list based on tuples
-Elements = [(BB, 10),(BB, 10)]
+Elements = [
+    (BB,2),
+    (BB,1),
+    (MD,1),
+    (BB,2),
+    (MD,1),
+    (BB,2),
+    (BB,1),
+    (MD,1),
+    (BB,1),
+    (MD,1),
+    (BB,2),
+]
 
 Elements = tntS.generateList(Elements)
 
@@ -138,4 +157,4 @@ def ambientT(y, T0 = 20):
     """
     return T0 + y * (3/100)
 
-B,t = calcThis(20, 20, 4)
+B,t = calcThis(20, 20, 2)
