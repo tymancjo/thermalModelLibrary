@@ -17,35 +17,67 @@ from thermalModelLibrary import tntSolverObj as tntS
 Cu = tntO.Material()
 
 # Defining some handy vellues
-HTC = 6
+HTC = 6 * 135/105
 emmisivity = 0.35
 
 
 # Defining analysis elements objects
+SMB_21 = tntO.thermalElement(
+        shape = tntO.shape(10,35,50,6,0),
+        HTC = HTC,
+        emissivity = emmisivity,
+        material = Cu)
+
+SMB_12 = tntO.thermalElement(
+        shape = tntO.shape(10,30,50,4,0),
+        HTC = HTC,
+        emissivity = emmisivity,
+        material = Cu) 
+
+SMB_6 = tntO.thermalElement(
+        shape = tntO.shape(10,30,50,2,0),
+        HTC = HTC,
+        emissivity = emmisivity,
+        material = Cu) 
+
 BB = tntO.thermalElement(
-        shape = tntO.shape(10,100,100,1,90),
+        shape = tntO.shape(20,35,25,1,-90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 MD = tntO.thermalElement(
-        shape = tntO.shape(10,100,30,1,0),
+        shape = tntO.shape(10,20,30,1,0),
         HTC = HTC,
         emissivity = emmisivity,
-        source = 10,
-        dP = False,
+        source = 0,
+        dP = True,
         material = Cu)
 
 
 # Defining the analysis circuit/objects connection stream
 
 # using auto generator for input list based on tuples
-vVBB = [
-            (BB,10),
-            (BB,10)
+MBB = [
+        (SMB_6, 5)
         ]
 
-VBB = tntS.generateList(vVBB)
+MBB1 = tntS.generateList(MBB)
+
+MBB = [
+        (SMB_6, 15)
+        ]
+
+MBB2 = tntS.generateList(MBB)
+
+vVBB = [
+            (BB,20)
+        ]
+
+VBB1 = tntS.generateList(vVBB)
+VBB2 = tntS.generateList(vVBB)
+VBB3 = tntS.generateList(vVBB)
+VBB4 = tntS.generateList(vVBB)
 
 MOD = [
         (MD,10),
@@ -57,21 +89,44 @@ Mod3 = tntS.generateList(MOD)
 Mod4 = tntS.generateList(MOD)
 
 # preparing objects in list for solver
-tntS.elementsForObjSolver(VBB)
-tntS.elementsForObjSolver(Mod1)
-tntS.elementsForObjSolver(Mod2)
-tntS.elementsForObjSolver(Mod3)
-tntS.elementsForObjSolver(Mod4)
+tntS.elementsForObjSolver(MBB1, 2000)
+tntS.elementsForObjSolver(MBB2, 500)
+
+tntS.elementsForObjSolver(VBB1, 1500)
+tntS.elementsForObjSolver(Mod1, 400)
+
+tntS.elementsForObjSolver(VBB2, 1100)
+tntS.elementsForObjSolver(Mod2, 400)
+
+tntS.elementsForObjSolver(VBB3, 700)
+tntS.elementsForObjSolver(Mod3, 400)
+
+tntS.elementsForObjSolver(VBB4, 300)
+tntS.elementsForObjSolver(Mod4, 300)
 
 # making connections
-Mod1[0].inputs.append(VBB[3])
-Mod2[0].inputs.append(VBB[6])
-Mod3[0].inputs.append(VBB[10])
-Mod4[0].inputs.append(VBB[14])
+VBB1[0].inputs.append(MBB1[-1])
+MBB2[0].inputs.append(MBB1[-1])
+
+VBB2[0].inputs.append(VBB1[-1])
+VBB3[0].inputs.append(VBB2[-1])
+VBB4[0].inputs.append(VBB3[-1])
+
+
+Mod1[0].inputs.append(VBB1[-1])
+Mod2[0].inputs.append(VBB2[-1])
+Mod3[0].inputs.append(VBB3[-1])
+Mod4[0].inputs.append(VBB4[-1])
 
 # creating total list of all elements
 Elements = []
-Elements.extend(VBB)
+
+Elements.extend(MBB1)
+Elements.extend(MBB2)
+Elements.extend(VBB1)
+Elements.extend(VBB2)
+Elements.extend(VBB3)
+Elements.extend(VBB4)
 Elements.extend(Mod1)
 Elements.extend(Mod2)
 Elements.extend(Mod3)
@@ -141,10 +196,10 @@ def calcThis(T0, Ta=20, Th=1, sort=True):
     # Temperature rises from lats timepoint along the 1D model length
     ax2 = fig.add_subplot(234)
 
-    ax2.plot(L2,b[-1,:],'rx--')
-    ax2.set_title('Temp Rise vs. 1D position')
+    ax2.plot(b[-1,:],'rx--')
+    ax2.set_title('Temp Rise vs. elements')
     plt.ylabel('Temp Rise [K]')
-    plt.xlabel('Position [mm]')
+    plt.xlabel('nodes')
 
     ax1.grid()
     ax2.grid()
@@ -165,6 +220,11 @@ def calcThis(T0, Ta=20, Th=1, sort=True):
     plt.ylabel('Height [mm]')
 
     plt.tight_layout()
+
+    figG = plt.figure('Geometry thermal map ')
+    axG = figG.add_subplot(111, aspect='equal')
+    tntS.drawElements(axG,Elements,np.array(b[-1,:]))
+
     plt.show()
 
     return B,t
@@ -179,4 +239,4 @@ def ambientT(y, T0 = 20):
     """
     return T0 + y * (3/100)
 
-B,t = calcThis(20, 20, 2, True)
+B,t = calcThis(20, 20, 4, True)

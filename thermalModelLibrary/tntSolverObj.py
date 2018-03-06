@@ -83,8 +83,12 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 		useF = True
 		air = tntA.airObject( 20, 1.1 * maxY, Tamb)
 
+		# generating sources to static solve Air
 		for element in Elements:
-			air.addQ(element.y, element.Power(current, Tamb))
+			if element.current is not False:
+				air.addQ(element.y, element.Power(element.current, Tamb))
+			else:
+				air.addQ(element.y, element.Power(current, Tamb))
 
 		air.solveT(sortAir) # updating the Air temperature dist 1- sorted 0-unsorted by values from top
 		print(air.aCellsT)
