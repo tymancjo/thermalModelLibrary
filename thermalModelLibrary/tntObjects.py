@@ -125,6 +125,8 @@ class thermalElement:
 		self.inputs = []
 		# output marked neighbour elements
 		self.outputs = []
+		# current for per branch currents aplication
+		self.currnen = False
 
 
 	def mass(self):

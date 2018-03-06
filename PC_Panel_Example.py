@@ -31,7 +31,7 @@ Tambient = 20
 
 # Defining analysis elements objects
 ACB = tntO.thermalElement(
-        shape = tntO.shape(20,100,230/4,1,90),
+        shape = tntO.shape(20,100,230/4,1,-90),
         HTC = HTC,
         emissivity = emmisivity,
         dP = True,
@@ -39,19 +39,19 @@ ACB = tntO.thermalElement(
         material = CuACB)
 
 zwora = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,1,90),
+        shape = tntO.shape(10,40,25,1,-90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 VBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,90),
+        shape = tntO.shape(10,40,100,4,-90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 BottomVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,15),
+        shape = tntO.shape(10,40,100,4,180 + 15),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
@@ -70,27 +70,69 @@ Connection2 = tntO.thermalElement(
 
 
 TopVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,180 - 15),
+        shape = tntO.shape(10,40,100,4,-15),
+        HTC = HTC,
+        emissivity = emmisivity,
+        material = Cu)
+
+MBB = tntO.thermalElement(
+        shape = tntO.shape(10,30,100,4,0),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 # Defining the analysis circuit/objects connection stream
-Elements =      [
-                (zwora, 4),
-                (VBB, 10),
-                (BottomVBB, 20),
-                (VBB, 10),
+PC_VBB =      [
+                (VBB, 4),
+                (TopVBB, 4),
+                (VBB, 2),
                 (Connection, 1),
                 (ACB, 4),
                 (Connection2, 1),
-                (TopVBB, 20),
-                (VBB, 20)
+                (BottomVBB, 2),
+                (VBB, 5)
                 ]
 
-Elements = tntS.generateList(Elements) 
+PC_VBB_1 = tntS.generateList(PC_VBB) 
 # Filling the element.inputs and element.output lists
-tntS.elementsForObjSolver(Elements) 
+
+PC_VBB_2 = tntS.generateList(PC_VBB) 
+# Filling the element.inputs and element.output lists
+
+PC_MBB = [
+            (MBB,5)
+        ] 
+
+PC_MBB_1 = tntS.generateList(PC_MBB) 
+PC_MBB_2 = tntS.generateList(PC_MBB) 
+PC_MBB_3 = tntS.generateList(PC_MBB) 
+
+
+tntS.elementsForObjSolver(PC_MBB_1, 0)
+tntS.elementsForObjSolver(PC_VBB_1, 2500)
+tntS.elementsForObjSolver(PC_MBB_2, 2500)
+tntS.elementsForObjSolver(PC_VBB_2, 1000)
+tntS.elementsForObjSolver(PC_MBB_3, 1500)
+
+# Making thermal connections between lists of elements (branches)
+PC_VBB_1[0].inputs.append(PC_MBB_1[-1])
+PC_VBB_2[0].inputs.append(PC_MBB_2[-1])
+PC_MBB_2[0].inputs.append(PC_MBB_1[-1])
+PC_MBB_3[0].inputs.append(PC_MBB_2[-1])
+
+
+# creating total list of all elements
+Elements = []
+Elements.extend(PC_MBB_1)
+Elements.extend(PC_VBB_1)
+Elements.extend(PC_MBB_2)
+Elements.extend(PC_VBB_2)
+Elements.extend(PC_MBB_3)
+
+# setting start point in XY plane
+# Elements[0].x = 0
+# Elements[0].y = 2000
+
 # Filling elements positions
 tntS.nodePosXY(Elements)
 

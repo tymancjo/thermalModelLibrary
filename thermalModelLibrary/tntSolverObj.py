@@ -141,7 +141,13 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 			# capturing the previous element temperature
 			elementPrevTemp = element.T
 			# solve for internal heat generaion
-			Q = element.Power(current, elementPrevTemp)
+			# using element current if existing:
+			if element.current is not False:
+				Q = element.Power(element.current, elementPrevTemp)
+			else:
+				# if not using current delivered by solver
+				Q = element.Power(current, elementPrevTemp)
+		
 			# solving for the convection heat taken out
 			Qconv = element.Qconv(elementPrevTemp, elementTamb)
 			Q -= Qconv
@@ -226,16 +232,30 @@ def nodePosXY(Elements):
 	This claculates the pairs of x,y position for each node element
 	and store this positions in each node object internal x,y 
 	"""
+	minY = 0.0
 
+	Elements[0].x = 0
+	Elements[0].y = 0
+
+	
 	for element in Elements:
 		if len(element.inputs) == 0:
-			element.x = element.shape.getPos()['x'] / 2
-			element.y = element.shape.getPos()['y'] / 2
+			if element.x == 0:
+				element.x = element.shape.getPos()['x'] / 2
+			if element.y == 0:
+				element.y = element.shape.getPos()['y'] / 2
 		else:
 			element.x = element.inputs[-1].x + 0.5*element.inputs[-1].shape.getPos()['x'] + element.shape.getPos()['x'] / 2
 
 			element.y = element.inputs[-1].y + 0.5*element.inputs[-1].shape.getPos()['y'] + element.shape.getPos()['y'] / 2
 
+
+		minY = min(minY, element.y)
+
+	# making shift to put onject minY to 0
+	for element in Elements:
+		element.y = element.y - minY
+		
 
 
 
@@ -276,8 +296,6 @@ def drawElements(axis, Elements, Temperatures=None):
             l = element.shape.getPos()['x']
             h = element.shape.getPos()['y']
             
-            rx = element.x - l/2
-            ry = element.y - h/2
 
             # figuring out the shape size to draw
             shapeW = abs(math.sin(element.shape.angle)) * element.shape.h
@@ -286,12 +304,17 @@ def drawElements(axis, Elements, Temperatures=None):
             shapeW = abs(max(abs(l)+shapeW,10))
             shapeH = abs(max(abs(h)+shapeH,10))
 
+            rx = element.x - shapeW/2
+            ry = element.y - shapeH/2
+
             # Drawig the rectangle
             r = patches.Rectangle(
-                    (min(rx,rx+l), ry - cosin*(shapeH/2)),     # (x,y)
+                    # (min(rx,rx+l), ry - cosin*(shapeH/2)),     # (x,y)
+                    (rx , ry),			    # (x,y)
                     shapeW,				    # width
                     shapeH,    				# height
                 )
+
             # Adding the rectangle shape into array
             # to display it later on plot
             my_patches.append(r)
@@ -356,10 +379,14 @@ def generateList(Input):
 
 	return output
 
-def elementsForObjSolver(Elements):
+def elementsForObjSolver(Elements, current=False):
 	# This procedure update the Elements list 
 	# to introduce each element neigbours into propper internal lists
 	for index, element in enumerate(Elements):
+		
+		# noting down current value in element
+		element.current = current
+
 		if index > 0:
 			element.inputs.append(Elements[index-1])
 		if index < len(Elements)-1:
