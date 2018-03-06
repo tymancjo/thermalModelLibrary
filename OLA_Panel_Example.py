@@ -13,7 +13,7 @@ import numpy as np
 # import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
-from thermalModelLibrary import tntSolver as tntS
+from thermalModelLibrary import tntSolverObj as tntS
 
 # Defining some materials
 Cu = tntO.Material()
