@@ -129,10 +129,6 @@ Elements.extend(PC_MBB_2)
 Elements.extend(PC_VBB_2)
 Elements.extend(PC_MBB_3)
 
-# setting start point in XY plane
-# Elements[0].x = 0
-# Elements[0].y = 2000
-
 # Filling elements positions
 tntS.nodePosXY(Elements)
 

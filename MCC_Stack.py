@@ -7,14 +7,11 @@ import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykres
 # import matplotlib.patches as patches
 # from matplotlib.collections import PatchCollection
 # import matplotlib as mpl
-import numpy as np
-# import math
 
-# import numpy as np
+import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
-from thermalModelLibrary import tntSolver as tntS
-from thermalModelLibrary import tntAir as tntA
+from thermalModelLibrary import tntSolverObj as tntS
 
 # Defining some materials
 Cu = tntO.Material()
@@ -32,10 +29,10 @@ BB = tntO.thermalElement(
         material = Cu)
 
 MD = tntO.thermalElement(
-        shape = tntO.shape(10,100,20,50,90),
+        shape = tntO.shape(10,100,30,1,0),
         HTC = HTC,
         emissivity = emmisivity,
-        source = 100,
+        source = 10,
         dP = False,
         material = Cu)
 
@@ -43,24 +40,49 @@ MD = tntO.thermalElement(
 # Defining the analysis circuit/objects connection stream
 
 # using auto generator for input list based on tuples
-Elements = [
-    (BB,2),
-    (BB,1),
-    (MD,1),
-    (BB,2),
-    (MD,1),
-    (BB,2),
-    (BB,1),
-    (MD,1),
-    (BB,1),
-    (MD,1),
-    (BB,2),
-]
+vVBB = [
+            (BB,10),
+            (BB,10)
+        ]
 
-Elements = tntS.generateList(Elements)
+VBB = tntS.generateList(vVBB)
+
+MOD = [
+        (MD,10),
+    ]
+
+Mod1 = tntS.generateList(MOD)
+Mod2 = tntS.generateList(MOD)
+Mod3 = tntS.generateList(MOD)
+Mod4 = tntS.generateList(MOD)
+
+# preparing objects in list for solver
+tntS.elementsForObjSolver(VBB)
+tntS.elementsForObjSolver(Mod1)
+tntS.elementsForObjSolver(Mod2)
+tntS.elementsForObjSolver(Mod3)
+tntS.elementsForObjSolver(Mod4)
+
+# making connections
+Mod1[0].inputs.append(VBB[3])
+Mod2[0].inputs.append(VBB[6])
+Mod3[0].inputs.append(VBB[10])
+Mod4[0].inputs.append(VBB[14])
+
+# creating total list of all elements
+Elements = []
+Elements.extend(VBB)
+Elements.extend(Mod1)
+Elements.extend(Mod2)
+Elements.extend(Mod3)
+Elements.extend(Mod4)
+
+# Filling elements positions
+tntS.nodePosXY(Elements)
 
 
-def calcThis(T0, Ta=20, Th=1):
+
+def calcThis(T0, Ta=20, Th=1, sort=True):
     """
     Inputs:
         T0 - initial temperature, will be ignored if elements aready have internal temp
@@ -81,7 +103,7 @@ def calcThis(T0, Ta=20, Th=1):
     # 4h analysis end time
     # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
     # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection
-    A,B,s, L2, XY, air = tntS.Solver(Elements,1200,Ta,T0,Th*60*60,500, 0.01)
+    A,B,s, L2, XY, air = tntS.Solver(Elements,0,Ta,T0,Th*60*60,500, 0.01, sort)
 
     # this returns:
     #  A vector of time for each step
@@ -157,4 +179,4 @@ def ambientT(y, T0 = 20):
     """
     return T0 + y * (3/100)
 
-B,t = calcThis(20, 20, 2)
+B,t = calcThis(20, 20, 2, True)

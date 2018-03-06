@@ -3,7 +3,8 @@
 from datetime import datetime
 startTime = datetime.now()
 
-import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
+import matplotlib.pyplot as plt 
+
 # import matplotlib.patches as patches
 # from matplotlib.collections import PatchCollection
 # import matplotlib as mpl
@@ -13,7 +14,7 @@ import numpy as np
 # import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
-from thermalModelLibrary import tntSolver as tntS
+from thermalModelLibrary import tntSolverObj as tntS
 from thermalModelLibrary import tntAir as tntA
 
 # Defining some materials
@@ -84,7 +85,14 @@ Elements = [(BB, 20),
 
 Elements = tntS.generateList(Elements)            
 
-air = tntA.airObject(10,2000,20)
+# preparing each object for solver 
+tntS.elementsForObjSolver(Elements)
+# Filling elements positions
+tntS.nodePosXY(Elements)
+
+
+
+# air = tntA.airObject(10,2000,20)
 
 
 def calcThis(T0, Ta=20, Th=1):

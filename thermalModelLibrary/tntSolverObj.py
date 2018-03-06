@@ -36,7 +36,7 @@ import copy
 from thermalModelLibrary import tntAir as tntA
 
 
-def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
+def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1, sortAir=True):
 
 	# # Filling the element.inputs and element.output lists
 	# elementsForObjSolver(Elements) 
@@ -86,7 +86,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 		for element in Elements:
 			air.addQ(element.y, element.Power(current, Tamb))
 
-		air.solveT(1) # updating the Air temperature dist 1- sorted 0-unsorted by values from top
+		air.solveT(sortAir) # updating the Air temperature dist 1- sorted 0-unsorted by values from top
 		print(air.aCellsT)
 		Tamb = air.T
 

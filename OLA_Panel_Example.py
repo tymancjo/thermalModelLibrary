@@ -81,7 +81,13 @@ Elements =      [(VBB, 10),
                 (VBB, 10),
                 ]
 
+# preparing list with unique objects
 Elements = tntS.generateList(Elements) 
+# preparing each object for solver 
+tntS.elementsForObjSolver(Elements)
+# Filling elements positions
+tntS.nodePosXY(Elements)
+
 
 def calcThis(T0, Ta=20, Th=1):
     """
