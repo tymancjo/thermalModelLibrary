@@ -38,14 +38,14 @@ ACB = tntO.thermalElement(
         source = 0,
         material = CuACB)
 
-zwora = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,1,90),
+VBB = tntO.thermalElement(
+        shape = tntO.shape(10,100,30,1,90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
-VBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,90),
+VBB1 = tntO.thermalElement(
+        shape = tntO.shape(10,400,30,1,90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
@@ -76,16 +76,9 @@ TopVBB = tntO.thermalElement(
         material = Cu)
 
 # Defining the analysis circuit/objects connection stream
-Elements =      [
-                (zwora, 1),
+Elements =      [(VBB, 10),
+                (VBB1, 10),
                 (VBB, 10),
-                (BottomVBB, 20),
-                (VBB, 10),
-                (Connection, 1),
-                (ACB, 4),
-                (Connection2, 1),
-                (TopVBB, 20),
-                (VBB, 20)
                 ]
 
 Elements = tntS.generateList(Elements) 
@@ -111,7 +104,7 @@ def calcThis(T0, Ta=20, Th=1):
     # 4h analysis end time
     # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
     # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-    A,B,s, L2, XY, air = tntS.Solver(Elements,2500,Ta,T0,Th*60*60,500, 0.01)
+    A,B,s, L2, XY, air = tntS.Solver(Elements,2000,Ta,T0,Th*60*60,500, 0.01)
 
     # this returns:
     #  A vector of time for each step

@@ -14,81 +14,78 @@ import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
 from thermalModelLibrary import tntSolver as tntS
+from thermalModelLibrary import tntAir as tntA
 
 # Defining some materials
-Cu = tntO.Material()
-CuACB = tntO.Material(conductivity=5e6)
-alteredCu = tntO.Material(thermalConductivity=100)
+Cu = tntO.Material(alpha=0)
+alteredCu = tntO.Material(thermalConductivity = 1e6)
 
-# Defining some handy vallues
-# IP42 parameters 
-HTC = 6
-emmisivity = 0.35
-
-# Enviroment and starting point
-Tambient = 20
+# Defining some handy vellues
+HTC = 5
 
 
 # Defining analysis elements objects
-ACB = tntO.thermalElement(
-        shape = tntO.shape(20,100,230/4,1,90),
-        HTC = HTC,
-        emissivity = emmisivity,
-        dP = True,
-        source = 0,
-        material = CuACB)
+Gerapid = tntO.thermalElement(
+        shape = tntO.shape(10,40,200,1,90),
+        HTC = 0,
+        emissivity = 0,
+        dP = False,
+        source = 80,
+        material = alteredCu)
 
-zwora = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,1,90),
+Terminal = tntO.thermalElement(
+        shape = tntO.shape(30,100,10),
         HTC = HTC,
-        emissivity = emmisivity,
+        emissivity = 0,
         material = Cu)
 
-VBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,90),
+Terminal2 = tntO.thermalElement(
+        shape = tntO.shape(30,100,10,1,180),
         HTC = HTC,
-        emissivity = emmisivity,
-        material = Cu)
-
-BottomVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,15),
-        HTC = HTC,
-        emissivity = emmisivity,
+        emissivity = 0,
         material = Cu)
 
 Connection = tntO.thermalElement(
-        shape = tntO.pipe(30,12.5,20,4,0),
-        HTC = 0,
+        shape = tntO.pipe(30,12.5,20,2),
+        HTC = HTC,
         emissivity = 0,
         material = Cu)
 
 Connection2 = tntO.thermalElement(
-        shape = tntO.pipe(30,12.5,20,4,180),
-        HTC = 0,
+        shape = tntO.pipe(30,12.5,20,2,180),
+        HTC = HTC,
         emissivity = 0,
         material = Cu)
 
 
-TopVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,180 - 15),
+BB = tntO.thermalElement(
+        shape = tntO.shape(10,100,30,4),
         HTC = HTC,
-        emissivity = emmisivity,
+        emissivity = 0,
+        material = Cu)
+
+BB2 = tntO.thermalElement(
+        shape = tntO.shape(10,100,30,4,180),
+        HTC = HTC,
+        emissivity = 0,
         material = Cu)
 
 # Defining the analysis circuit/objects connection stream
-Elements =      [
-                (zwora, 1),
-                (VBB, 10),
-                (BottomVBB, 20),
-                (VBB, 10),
-                (Connection, 1),
-                (ACB, 4),
-                (Connection2, 1),
-                (TopVBB, 20),
-                (VBB, 20)
-                ]
+# Elements = [BB2,BB2,BB2,Connection2, Terminal2, Gerapid, Terminal, Connection, BB, BB, BB]
 
-Elements = tntS.generateList(Elements) 
+# using auto generator for input list based on tuples
+Elements = [(BB, 20),
+            (Connection, 1),
+            (Terminal, 20),
+            (Gerapid, 1),
+            (Terminal2, 20),
+            (Connection2, 1),
+            (BB2, 20)]
+
+Elements = tntS.generateList(Elements)            
+
+air = tntA.airObject(10,2000,20)
+
 
 def calcThis(T0, Ta=20, Th=1):
     """
@@ -111,7 +108,7 @@ def calcThis(T0, Ta=20, Th=1):
     # 4h analysis end time
     # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
     # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-    A,B,s, L2, XY, air = tntS.Solver(Elements,2500,Ta,T0,Th*60*60,500, 0.01)
+    A,B,s, L2, XY, air = tntS.Solver(Elements,4000,Ta,T0,Th*60*60,500, 0.01)
 
     # this returns:
     #  A vector of time for each step
@@ -121,7 +118,7 @@ def calcThis(T0, Ta=20, Th=1):
     #  XY - vector of 2D vectors of XY position of each node
 
 
-    print('execution time: ', datetime.now() - startTime)
+
     print('time steps: ', len(A))
     print('solver steps: ', s)
     print('thermal nodes: ', len(Elements))
@@ -177,15 +174,11 @@ def calcThis(T0, Ta=20, Th=1):
 
     return B,t
 
-# Function that describe ambient change with height
-def ambientT(y, Q=0, T0 = 20):
+def ambientT(y, T0 = 20):
     """
     y - in mmm
     output in degC
     """
     return T0 + y * (3/100)
-
-def consT(y):
-    return 20
 
 B,t = calcThis(20, 20, 4)

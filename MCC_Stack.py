@@ -14,81 +14,51 @@ import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
 from thermalModelLibrary import tntSolver as tntS
+from thermalModelLibrary import tntAir as tntA
 
 # Defining some materials
 Cu = tntO.Material()
-CuACB = tntO.Material(conductivity=5e6)
-alteredCu = tntO.Material(thermalConductivity=100)
 
-# Defining some handy vallues
-# IP42 parameters 
+# Defining some handy vellues
 HTC = 6
 emmisivity = 0.35
 
-# Enviroment and starting point
-Tambient = 20
-
 
 # Defining analysis elements objects
-ACB = tntO.thermalElement(
-        shape = tntO.shape(20,100,230/4,1,90),
-        HTC = HTC,
-        emissivity = emmisivity,
-        dP = True,
-        source = 0,
-        material = CuACB)
-
-zwora = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,1,90),
+BB = tntO.thermalElement(
+        shape = tntO.shape(10,100,100,1,90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
-VBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,90),
+MD = tntO.thermalElement(
+        shape = tntO.shape(10,100,20,50,90),
         HTC = HTC,
         emissivity = emmisivity,
+        source = 100,
+        dP = False,
         material = Cu)
 
-BottomVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,15),
-        HTC = HTC,
-        emissivity = emmisivity,
-        material = Cu)
-
-Connection = tntO.thermalElement(
-        shape = tntO.pipe(30,12.5,20,4,0),
-        HTC = 0,
-        emissivity = 0,
-        material = Cu)
-
-Connection2 = tntO.thermalElement(
-        shape = tntO.pipe(30,12.5,20,4,180),
-        HTC = 0,
-        emissivity = 0,
-        material = Cu)
-
-
-TopVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,180 - 15),
-        HTC = HTC,
-        emissivity = emmisivity,
-        material = Cu)
 
 # Defining the analysis circuit/objects connection stream
-Elements =      [
-                (zwora, 1),
-                (VBB, 10),
-                (BottomVBB, 20),
-                (VBB, 10),
-                (Connection, 1),
-                (ACB, 4),
-                (Connection2, 1),
-                (TopVBB, 20),
-                (VBB, 20)
-                ]
 
-Elements = tntS.generateList(Elements) 
+# using auto generator for input list based on tuples
+Elements = [
+    (BB,2),
+    (BB,1),
+    (MD,1),
+    (BB,2),
+    (MD,1),
+    (BB,2),
+    (BB,1),
+    (MD,1),
+    (BB,1),
+    (MD,1),
+    (BB,2),
+]
+
+Elements = tntS.generateList(Elements)
+
 
 def calcThis(T0, Ta=20, Th=1):
     """
@@ -102,7 +72,7 @@ def calcThis(T0, Ta=20, Th=1):
             B - array of temperatures for eachTimestep and element
             t - vector of time
     """
-    
+
     # Running the solver for
     # Geometry from Elements list
     # 4000 A
@@ -110,8 +80,8 @@ def calcThis(T0, Ta=20, Th=1):
     # 20 degC starting temperature
     # 4h analysis end time
     # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
-    # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-    A,B,s, L2, XY, air = tntS.Solver(Elements,2500,Ta,T0,Th*60*60,500, 0.01)
+    # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection
+    A,B,s, L2, XY, air = tntS.Solver(Elements,1200,Ta,T0,Th*60*60,500, 0.01)
 
     # this returns:
     #  A vector of time for each step
@@ -121,7 +91,7 @@ def calcThis(T0, Ta=20, Th=1):
     #  XY - vector of 2D vectors of XY position of each node
 
 
-    print('execution time: ', datetime.now() - startTime)
+
     print('time steps: ', len(A))
     print('solver steps: ', s)
     print('thermal nodes: ', len(Elements))
@@ -177,15 +147,14 @@ def calcThis(T0, Ta=20, Th=1):
 
     return B,t
 
-# Function that describe ambient change with height
-def ambientT(y, Q=0, T0 = 20):
+def consT(y):
+    return 20
+
+def ambientT(y, T0 = 20):
     """
     y - in mmm
     output in degC
     """
     return T0 + y * (3/100)
 
-def consT(y):
-    return 20
-
-B,t = calcThis(20, 20, 4)
+B,t = calcThis(20, 20, 2)

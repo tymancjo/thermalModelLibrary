@@ -54,6 +54,7 @@ class pipe:
 	def __init__(self, OutDiameter=10, InDiameter=100, length=100, n=1, angle=0):
 		self.fi_out = OutDiameter  # im [mm]
 		self.fi_in = InDiameter  # im [mm]
+		self.h = OutDiameter  # im [mm] - for compatibility reasons
 		self.l = length  # im [mm]
 		self.n = n  # number of elements in parralel
 		self.angle = angle * math.pi / 180  # Angle of position, 0 = flat(horizontal)
@@ -117,6 +118,10 @@ class thermalElement:
 		self.dP = dP
 		self.HTC = HTC
 		self.emissivity = emissivity
+		self.x = None
+		self.y = None 
+		self.T = False
+
 
 	def mass(self):
 		return self.shape.Volume() * self.material.density
