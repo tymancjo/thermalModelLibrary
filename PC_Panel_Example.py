@@ -38,6 +38,12 @@ ACB = tntO.thermalElement(
         source = 0,
         material = CuACB)
 
+zwora = tntO.thermalElement(
+        shape = tntO.shape(10,40,100,1,90),
+        HTC = HTC,
+        emissivity = emmisivity,
+        material = Cu)
+
 VBB = tntO.thermalElement(
         shape = tntO.shape(10,40,25,4,90),
         HTC = HTC,
@@ -70,7 +76,9 @@ TopVBB = tntO.thermalElement(
         material = Cu)
 
 # Defining the analysis circuit/objects connection stream
-Elements =      [(VBB, 10),
+Elements =      [
+                (zwora, 1),
+                (VBB, 10),
                 (BottomVBB, 20),
                 (VBB, 10),
                 (Connection, 1),
