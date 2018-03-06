@@ -13,7 +13,7 @@ import numpy as np
 # import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
-from thermalModelLibrary import tntSolver as tntS
+from thermalModelLibrary import tntSolverObj as tntS
 
 # Defining some materials
 Cu = tntO.Material()
@@ -39,7 +39,7 @@ ACB = tntO.thermalElement(
         material = CuACB)
 
 zwora = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,1,90),
+        shape = tntO.shape(10,40,25,1,90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
@@ -77,7 +77,7 @@ TopVBB = tntO.thermalElement(
 
 # Defining the analysis circuit/objects connection stream
 Elements =      [
-                (zwora, 1),
+                (zwora, 4),
                 (VBB, 10),
                 (BottomVBB, 20),
                 (VBB, 10),
@@ -89,6 +89,10 @@ Elements =      [
                 ]
 
 Elements = tntS.generateList(Elements) 
+# Filling the element.inputs and element.output lists
+tntS.elementsForObjSolver(Elements) 
+# Filling elements positions
+tntS.nodePosXY(Elements)
 
 def calcThis(T0, Ta=20, Th=1):
     """

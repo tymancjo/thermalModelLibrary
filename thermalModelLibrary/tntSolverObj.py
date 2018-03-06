@@ -38,21 +38,21 @@ from thermalModelLibrary import tntAir as tntA
 
 def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
 
-	# Filling the element.inputs and element.output lists
-	elementsForObjSolver(Elements) 
-	# Preparing some geometry data for each node element
-	# Calculating the each node 2D position based on the Elements vector
-	XY = nodePosXY(Elements)
-	# putting the elements positions into elements
-	# this will be helpfull for any specific handling and drawing results
+	# # Filling the element.inputs and element.output lists
+	# elementsForObjSolver(Elements) 
+	# # Preparing some geometry data for each node element
+	# # Calculating the each node 2D position based on the Elements vector
+	# # XY = nodePosXY(Elements)
+	
+	# # calulating each element x and y
+	# nodePosXY(Elements)
+	
 	# we will use this same loop as well to check if all elements have already T set
 	elementsHaveT = True
 
 	# and we will capture maxY value
 	maxY = 0
-	for index, element in enumerate(Elements):
-		element.x = XY[index][0]
-		element.y = XY[index][1]
+	for element in Elements:
 		maxY = max(maxY, element.y)
 
 		if not element.T:
@@ -209,7 +209,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 				element.T = GlobalTemperatures[-1][index]
 
 
-	return Time, GlobalTemperatures, SolverSteps, nodePositions(Elements), XY, air
+	return Time, GlobalTemperatures, SolverSteps, nodePositions(Elements), None, air
 
 
 def nodePositions(Elements):
@@ -223,18 +223,21 @@ def nodePositions(Elements):
 
 def nodePosXY(Elements):
 	"""
-	This returns the pairs of x,y position for each node element
+	This claculates the pairs of x,y position for each node element
+	and store this positions in each node object internal x,y 
 	"""
-	posX = [ (0.5*Elements[i-1].shape.getPos()['x'] + 0.5*Elements[i].shape.getPos()['x']) for i in range(1, len(Elements))]
-	posX.insert(0, 0.5*Elements[0].shape.getPos()['x'])
 
-	posY = [ (0.5*Elements[i-1].shape.getPos()['y'] + 0.5*Elements[i].shape.getPos()['y']) for i in range(1, len(Elements))]
-	posY.insert(0, 0.5*Elements[0].shape.getPos()['y'])
+	for element in Elements:
+		if len(element.inputs) == 0:
+			element.x = element.shape.getPos()['x'] / 2
+			element.y = element.shape.getPos()['y'] / 2
+		else:
+			element.x = element.inputs[-1].x + 0.5*element.inputs[-1].shape.getPos()['x'] + element.shape.getPos()['x'] / 2
 
-	sumX = [sum(posX[0:x]) for x in range(1,len(posX)+1)]
-	sumY = [sum(posY[0:x]) for x in range(1,len(posY)+1)]
+			element.y = element.inputs[-1].y + 0.5*element.inputs[-1].shape.getPos()['y'] + element.shape.getPos()['y'] / 2
 
-	return [ [sumX[i], sumY[i]] for i in range(len(posY))]
+
+
 
 
 def drawElements(axis, Elements, Temperatures=None):
@@ -252,8 +255,8 @@ def drawElements(axis, Elements, Temperatures=None):
     my_patches = []
 
     # initial position of first element
-    rx=0
-    ry=0
+    # rx=0
+    # ry=0
 
     # initial values for plot bondary
     maxY = 0
@@ -269,8 +272,12 @@ def drawElements(axis, Elements, Temperatures=None):
             # this is usefull for propper placing in Y
             cosin = abs(math.cos(angle))
 
+
             l = element.shape.getPos()['x']
             h = element.shape.getPos()['y']
+            
+            rx = element.x - l/2
+            ry = element.y - h/2
 
             # figuring out the shape size to draw
             shapeW = abs(math.sin(element.shape.angle)) * element.shape.h
@@ -289,9 +296,9 @@ def drawElements(axis, Elements, Temperatures=None):
             # to display it later on plot
             my_patches.append(r)
 
-            # updating the x & y position for next element
-            rx += l
-            ry += h
+            # # updating the x & y position for next element
+            # rx += l
+            # ry += h
 
             # checking for the graph limits
             # and updating if this element push them
