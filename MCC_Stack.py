@@ -17,7 +17,7 @@ from thermalModelLibrary import tntSolverObj as tntS
 Cu = tntO.Material()
 
 # Defining some handy vellues
-HTC = 6 * 135/105
+HTC = 6 * (135/105) * (108/105)
 emmisivity = 0.35
 
 
@@ -59,13 +59,13 @@ MD = tntO.thermalElement(
 
 # using auto generator for input list based on tuples
 MBB = [
-        (SMB_6, 5)
+        (SMB_12, 5)
         ]
 
 MBB1 = tntS.generateList(MBB)
 
 MBB = [
-        (SMB_6, 15)
+        (SMB_12, 15)
         ]
 
 MBB2 = tntS.generateList(MBB)
@@ -105,18 +105,27 @@ tntS.elementsForObjSolver(VBB4, 300)
 tntS.elementsForObjSolver(Mod4, 300)
 
 # making connections
-VBB1[0].inputs.append(MBB1[-1])
-MBB2[0].inputs.append(MBB1[-1])
+# VBB1[0].inputs.append(MBB1[-1])
+tntS.joinNodes(MBB1, VBB1, -1)
+# MBB2[0].inputs.append(MBB1[-1])
+tntS.joinNodes(MBB1, MBB2, -1)
 
-VBB2[0].inputs.append(VBB1[-1])
-VBB3[0].inputs.append(VBB2[-1])
-VBB4[0].inputs.append(VBB3[-1])
+# VBB2[0].inputs.append(VBB1[-1])
+tntS.joinNodes(VBB1, VBB2, -1)
+# VBB3[0].inputs.append(VBB2[-1])
+tntS.joinNodes(VBB2, VBB3, -1)
+# VBB4[0].inputs.append(VBB3[-1])
+tntS.joinNodes(VBB3, VBB4, -1)
 
 
-Mod1[0].inputs.append(VBB1[-1])
-Mod2[0].inputs.append(VBB2[-1])
-Mod3[0].inputs.append(VBB3[-1])
-Mod4[0].inputs.append(VBB4[-1])
+# Mod1[0].inputs.append(VBB1[-1])
+tntS.joinNodes(VBB1, Mod1, -1)
+# Mod2[0].inputs.append(VBB2[-1])
+tntS.joinNodes(VBB2, Mod2, -1)
+# Mod3[0].inputs.append(VBB3[-1])
+tntS.joinNodes(VBB3, Mod3, -1)
+# Mod4[0].inputs.append(VBB4[-1])
+tntS.joinNodes(VBB4, Mod4, -1)
 
 # creating total list of all elements
 Elements = []

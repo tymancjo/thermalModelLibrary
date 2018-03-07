@@ -396,3 +396,17 @@ def elementsForObjSolver(Elements, current=False):
 		if index < len(Elements)-1:
 			element.outputs.append(Elements[index+1]) 
 	# it makes updates in elements objects no return here
+
+def joinNodes(ListA, ListB, JointPosInA):
+	# Join two node list 
+	# Join ListB into node of ListA at position JointPosIaA
+	# ListA:
+	#  [0]
+	#  [1]
+	#  [.]              listB
+	#  [JointPos]  <--- [0][1][2][.][-1]
+	#  [.]
+	#  [-1]	
+
+	ListA[JointPosInA].outputs.append(ListB[0])
+	ListB[0].inputs.append(ListA[JointPosInA])

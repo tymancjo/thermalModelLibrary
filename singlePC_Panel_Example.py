@@ -4,21 +4,17 @@ from datetime import datetime
 startTime = datetime.now()
 
 import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
-# import matplotlib.patches as patches
-# from matplotlib.collections import PatchCollection
+
 import matplotlib as mpl
 import numpy as np
 import mpld3
-# import math
-
-# import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
 from thermalModelLibrary import tntSolverObj as tntS
 
 # Defining some materials
 Cu = tntO.Material()
-CuACB = tntO.Material(conductivity=5e6)
+CuACB = tntO.Material(conductivity=2.5e6)
 alteredCu = tntO.Material(thermalConductivity=100)
 
 # Defining some handy vallues
@@ -32,7 +28,7 @@ Tambient = 20
 
 # Defining analysis elements objects
 ACB = tntO.thermalElement(
-        shape = tntO.shape(20,100,230/4,1,-90),
+        shape = tntO.shape(20,100,300/4,1,-90),
         HTC = HTC,
         emissivity = emmisivity,
         dP = True,
@@ -40,12 +36,13 @@ ACB = tntO.thermalElement(
         material = CuACB)
 
 zwora = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,1,-90),
+        shape = tntO.shape(10,40,50,1,0),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 VBB = tntO.thermalElement(
+        shape = tntO.shape(10,40,100,4,-90),
         shape = tntO.shape(10,40,100,4,-90),
         HTC = HTC,
         emissivity = emmisivity,
@@ -84,14 +81,15 @@ MBB = tntO.thermalElement(
 
 # Defining the analysis circuit/objects connection stream
 PC_VBB =      [
-                (VBB, 4),
-                (TopVBB, 4),
-                (VBB, 2),
-                (Connection, 1),
+                (VBB, 8),
+                # (TopVBB, 4),
+                # (VBB, 2),
+                # (Connection, 1),
                 (ACB, 4),
-                (Connection2, 1),
-                (BottomVBB, 2),
-                (VBB, 5)
+                # (Connection2, 1),
+                # (BottomVBB, 2),
+                (VBB, 5),
+                (zwora, 6)
                 ]
 
 PC_VBB_1 = tntS.generateList(PC_VBB) 
@@ -110,29 +108,29 @@ PC_MBB_3 = tntS.generateList(PC_MBB)
 
 
 tntS.elementsForObjSolver(PC_MBB_1, 0)
-tntS.elementsForObjSolver(PC_VBB_1, 2500)
+tntS.elementsForObjSolver(PC_VBB_1, 2000)
 tntS.elementsForObjSolver(PC_MBB_2, 2500)
 tntS.elementsForObjSolver(PC_VBB_2, 1500)
 tntS.elementsForObjSolver(PC_MBB_3, 1000)
 
 # Making thermal connections between lists of elements (branches)
 # PC_VBB_1[0].inputs.append(PC_MBB_1[-1])
-tntS.joinNodes(PC_MBB_1, PC_VBB_1, -1)
-# PC_VBB_2[0].inputs.append(PC_MBB_2[-1])
-tntS.joinNodes(PC_MBB_2, PC_VBB_2, -1)
-# PC_MBB_2[0].inputs.append(PC_MBB_1[-1])
-tntS.joinNodes(PC_MBB_1, PC_MBB_2, -1)
-# PC_MBB_3[0].inputs.append(PC_MBB_2[-1])
-tntS.joinNodes(PC_MBB_2, PC_MBB_3, -1)
+# tntS.joinNodes(PC_MBB_1, PC_VBB_1, -1)
+# # PC_VBB_2[0].inputs.append(PC_MBB_2[-1])
+# tntS.joinNodes(PC_MBB_2, PC_VBB_2, -1)
+# # PC_MBB_2[0].inputs.append(PC_MBB_1[-1])
+# tntS.joinNodes(PC_MBB_1, PC_MBB_2, -1)
+# # PC_MBB_3[0].inputs.append(PC_MBB_2[-1])
+# tntS.joinNodes(PC_MBB_2, PC_MBB_3, -1)
 
 
 # creating total list of all elements
 Elements = []
-Elements.extend(PC_MBB_1)
+# Elements.extend(PC_MBB_1)
 Elements.extend(PC_VBB_1)
-Elements.extend(PC_MBB_2)
-Elements.extend(PC_VBB_2)
-Elements.extend(PC_MBB_3)
+# Elements.extend(PC_MBB_2)
+# Elements.extend(PC_VBB_2)
+# Elements.extend(PC_MBB_3)
 
 # Filling elements positions
 tntS.nodePosXY(Elements)
@@ -196,10 +194,10 @@ def calcThis(T0, Ta=20, Th=1):
     # Temperature rises from lats timepoint along the 1D model length
     ax2 = fig.add_subplot(234)
 
-    ax2.plot(L2,b[-1,:],'rx--')
+    ax2.plot(b[-1,::-1],'rx--')
     ax2.set_title('Temp Rise vs. 1D position')
     plt.ylabel('Temp Rise [K]')
-    plt.xlabel('Position [mm]')
+    plt.xlabel('node')
 
     ax1.grid()
     ax2.grid()
@@ -223,7 +221,7 @@ def calcThis(T0, Ta=20, Th=1):
 
     figG = plt.figure('Geometry thermal map ')
     axG = figG.add_subplot(111, aspect='equal')
-    tntS.drawElements(axG,Elements,np.array(b[-1,:]))
+    # tntS.drawElements(axG,Elements,np.array(b[-1,:]))
 
     
     scatter = axG.scatter([element.x for element in Elements],
@@ -253,4 +251,4 @@ def ambientT(y, Q=0, T0 = 20):
 def consT(y):
     return 20
 
-B,t = calcThis(20, 20, 4)
+B,t = calcThis(20, consT, 4)
