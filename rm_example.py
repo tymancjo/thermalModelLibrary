@@ -14,7 +14,7 @@ conductor = tntO.thermalElement(
         	source = 0,
         	material = Cu)
 
-Elements = [ (conductor, 11) ]
+Elements = [ (conductor, 10) ]
 
 Elements = tntS.generateList(Elements) 
 
