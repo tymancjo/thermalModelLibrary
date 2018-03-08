@@ -13,7 +13,7 @@ import numpy as np
 # import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
-from thermalModelLibrary import tntSolver as tntS
+from thermalModelLibrary import tntSolverObj as tntS
 from thermalModelLibrary import tntAir as tntA
 
 # Defining some materials
@@ -26,20 +26,24 @@ emmisivity = 0.35
 
 # Defining analysis elements objects
 BB = tntO.thermalElement(
-        shape = tntO.shape(10,100,100,1,90),
+        shape = tntO.shape(10,100,80,1,90),
         HTC = HTC,
         emissivity = emmisivity,
-        material = Cu)
+        material = Cu,
+        dP = False,
+        source = 180/10)
 
 
 
 # Defining the analysis circuit/objects connection stream
 
 # using auto generator for input list based on tuples
-Elements = [(BB, 10),(BB, 10)]
+Elements = [(BB, 10)]
 
 Elements = tntS.generateList(Elements)
-
+tntS.elementsForObjSolver(Elements)
+# Filling elements positions
+tntS.nodePosXY(Elements)
 
 def calcThis(T0, Ta=20, Th=1):
     """
@@ -115,9 +119,9 @@ def calcThis(T0, Ta=20, Th=1):
 
     ax4 = fig.add_subplot(133)
     if air:
-        ax4.plot(air.aCellsT, np.linspace(0,air.h,air.n) ,'b--')
+        ax4.plot(air.aCellsT -20, np.linspace(0,air.h,air.n) ,'b--')
     else:
-        ax4.plot(np.array([Ta(y) for y in np.linspace(0,max(L2),20)]), np.linspace(0,max(L2),20) ,'b--')
+        ax4.plot(np.array([Ta(y)-20 for y in np.linspace(0,max(L2),20)]), np.linspace(0,max(L2),20) ,'b--')
 
     ax4.set_title('Air Temp vs. height')
     plt.xlabel('Air Temp [degC]')
