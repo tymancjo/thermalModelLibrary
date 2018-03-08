@@ -332,14 +332,14 @@ def drawElements(axis, Elements, Temperatures=None):
             if maxX < rx:
                 maxX = rx
 
-            if maxY < ry:
-            	maxY = ry
+            if maxY < ry + shapeH:
+            	maxY = ry + shapeH
 
             if minX > rx:
                 minX = rx
 
-            if minY > ry:
-            	minY = ry
+            if minY > ry - shapeH:
+            	minY = ry - shapeH
 
     # some matplotlib mambo jambo to make the rect
     # colored according to the temp rise
