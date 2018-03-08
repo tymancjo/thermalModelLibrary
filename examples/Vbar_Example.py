@@ -13,79 +13,37 @@ import numpy as np
 # import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
-from thermalModelLibrary import tntSolver as tntS
+from thermalModelLibrary import tntSolverObj as tntS
 from thermalModelLibrary import tntAir as tntA
 
 # Defining some materials
-Cu = tntO.Material(alpha=0)
-alteredCu = tntO.Material(thermalConductivity = 1e6)
+Cu = tntO.Material()
 
 # Defining some handy vellues
-HTC = 5
+HTC = 6
+emmisivity = 0.35
 
 
 # Defining analysis elements objects
-Gerapid = tntO.thermalElement(
-        shape = tntO.shape(10,40,200,1,90),
-        HTC = 0,
-        emissivity = 0,
-        dP = False,
-        source = 80,
-        material = alteredCu)
-
-Terminal = tntO.thermalElement(
-        shape = tntO.shape(30,100,10),
-        HTC = HTC,
-        emissivity = 0,
-        material = Cu)
-
-Terminal2 = tntO.thermalElement(
-        shape = tntO.shape(30,100,10,1,180),
-        HTC = HTC,
-        emissivity = 0,
-        material = Cu)
-
-Connection = tntO.thermalElement(
-        shape = tntO.pipe(30,12.5,20,2),
-        HTC = HTC,
-        emissivity = 0,
-        material = Cu)
-
-Connection2 = tntO.thermalElement(
-        shape = tntO.pipe(30,12.5,20,2,180),
-        HTC = HTC,
-        emissivity = 0,
-        material = Cu)
-
-
 BB = tntO.thermalElement(
-        shape = tntO.shape(10,100,30,4),
+        shape = tntO.shape(10,100,80,1,90),
         HTC = HTC,
-        emissivity = 0,
-        material = Cu)
+        emissivity = emmisivity,
+        material = Cu,
+        dP = False,
+        source = 180/10)
 
-BB2 = tntO.thermalElement(
-        shape = tntO.shape(10,100,30,4,180),
-        HTC = HTC,
-        emissivity = 0,
-        material = Cu)
+
 
 # Defining the analysis circuit/objects connection stream
-# Elements = [BB2,BB2,BB2,Connection2, Terminal2, Gerapid, Terminal, Connection, BB, BB, BB]
 
 # using auto generator for input list based on tuples
-Elements = [(BB, 20),
-            (Connection, 1),
-            (Terminal, 20),
-            (Gerapid, 1),
-            (Terminal2, 20),
-            (Connection2, 1),
-            (BB2, 20)]
+Elements = [(BB, 10)]
 
-Elements = tntS.generateList(Elements)            
-
-air = tntA.airObject(10,2000,20)
-
+Elements = tntS.generateList(Elements)
+tntS.elementsForObjSolver(Elements)
+# Filling elements positions
+tntS.nodePosXY(Elements)
 
 def calcThis(T0, Ta=20, Th=1):
     """
@@ -99,7 +57,7 @@ def calcThis(T0, Ta=20, Th=1):
             B - array of temperatures for eachTimestep and element
             t - vector of time
     """
-    
+
     # Running the solver for
     # Geometry from Elements list
     # 4000 A
@@ -107,8 +65,8 @@ def calcThis(T0, Ta=20, Th=1):
     # 20 degC starting temperature
     # 4h analysis end time
     # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
-    # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-    A,B,s, L2, XY, air = tntS.Solver(Elements,4000,Ta,T0,Th*60*60,500, 0.01)
+    # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection
+    A,B,s, L2, XY, air = tntS.Solver(Elements,2000,Ta,T0,Th*60*60,500, 0.01)
 
     # this returns:
     #  A vector of time for each step
@@ -161,9 +119,9 @@ def calcThis(T0, Ta=20, Th=1):
 
     ax4 = fig.add_subplot(133)
     if air:
-        ax4.plot(air.aCellsT, np.linspace(0,air.h,air.n) ,'b--')
+        ax4.plot(air.aCellsT -20, np.linspace(0,air.h,air.n) ,'b--')
     else:
-        ax4.plot(np.array([Ta(y) for y in np.linspace(0,max(L2),20)]), np.linspace(0,max(L2),20) ,'b--')
+        ax4.plot(np.array([Ta(y)-20 for y in np.linspace(0,max(L2),20)]), np.linspace(0,max(L2),20) ,'b--')
 
     ax4.set_title('Air Temp vs. height')
     plt.xlabel('Air Temp [degC]')
@@ -173,6 +131,9 @@ def calcThis(T0, Ta=20, Th=1):
     plt.show()
 
     return B,t
+
+def consT(y):
+    return 20
 
 def ambientT(y, T0 = 20):
     """

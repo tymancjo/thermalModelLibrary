@@ -6,14 +6,15 @@ startTime = datetime.now()
 import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
 # import matplotlib.patches as patches
 # from matplotlib.collections import PatchCollection
-# import matplotlib as mpl
+import matplotlib as mpl
 import numpy as np
+import mpld3
 # import math
 
 # import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
-from thermalModelLibrary import tntSolver as tntS
+from thermalModelLibrary import tntSolverObj as tntS
 
 # Defining some materials
 Cu = tntO.Material()
@@ -31,27 +32,27 @@ Tambient = 20
 
 # Defining analysis elements objects
 ACB = tntO.thermalElement(
-        shape = tntO.shape(20,100,230/4,1,90),
+        shape = tntO.shape(20,100,230/4,1,-90),
         HTC = HTC,
         emissivity = emmisivity,
         dP = True,
         source = 0,
         material = CuACB)
 
-VBB = tntO.thermalElement(
-        shape = tntO.shape(10,100,30,1,90),
+zwora = tntO.thermalElement(
+        shape = tntO.shape(10,40,25,1,-90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
-VBB1 = tntO.thermalElement(
-        shape = tntO.shape(10,400,30,1,90),
+VBB = tntO.thermalElement(
+        shape = tntO.shape(10,40,100,4,-90),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 BottomVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,15),
+        shape = tntO.shape(10,40,100,4,180 + 15),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
@@ -70,18 +71,71 @@ Connection2 = tntO.thermalElement(
 
 
 TopVBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,25,4,180 - 15),
+        shape = tntO.shape(10,40,100,4,-15),
+        HTC = HTC,
+        emissivity = emmisivity,
+        material = Cu)
+
+MBB = tntO.thermalElement(
+        shape = tntO.shape(10,30,100,4,0),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 # Defining the analysis circuit/objects connection stream
-Elements =      [(VBB, 10),
-                (VBB1, 10),
-                (VBB, 10),
+PC_VBB =      [
+                (VBB, 4),
+                (TopVBB, 3),
+                (VBB, 2),
+                (Connection, 1),
+                (ACB, 4),
+                (Connection2, 1),
+                (BottomVBB, 3),
+                (VBB, 5)
                 ]
 
-Elements = tntS.generateList(Elements) 
+PC_VBB_1 = tntS.generateList(PC_VBB) 
+# Filling the element.inputs and element.output lists
+
+PC_VBB_2 = tntS.generateList(PC_VBB) 
+# Filling the element.inputs and element.output lists
+
+PC_MBB = [
+            (MBB,5)
+        ] 
+
+PC_MBB_1 = tntS.generateList(PC_MBB) 
+PC_MBB_2 = tntS.generateList(PC_MBB) 
+PC_MBB_3 = tntS.generateList(PC_MBB) 
+
+
+tntS.elementsForObjSolver(PC_MBB_1, 0)
+tntS.elementsForObjSolver(PC_VBB_1, 2500)
+tntS.elementsForObjSolver(PC_MBB_2, 2500)
+tntS.elementsForObjSolver(PC_VBB_2, 1500)
+tntS.elementsForObjSolver(PC_MBB_3, 1000)
+
+# Making thermal connections between lists of elements (branches)
+# PC_VBB_1[0].inputs.append(PC_MBB_1[-1])
+tntS.joinNodes(PC_MBB_1, PC_VBB_1, -1)
+# PC_VBB_2[0].inputs.append(PC_MBB_2[-1])
+tntS.joinNodes(PC_MBB_2, PC_VBB_2, -1)
+# PC_MBB_2[0].inputs.append(PC_MBB_1[-1])
+tntS.joinNodes(PC_MBB_1, PC_MBB_2, -1)
+# PC_MBB_3[0].inputs.append(PC_MBB_2[-1])
+tntS.joinNodes(PC_MBB_2, PC_MBB_3, -1)
+
+
+# creating total list of all elements
+Elements = []
+Elements.extend(PC_MBB_1)
+Elements.extend(PC_VBB_1)
+Elements.extend(PC_MBB_2)
+Elements.extend(PC_VBB_2)
+Elements.extend(PC_MBB_3)
+
+# Filling elements positions
+tntS.nodePosXY(Elements)
 
 def calcThis(T0, Ta=20, Th=1):
     """
@@ -104,7 +158,7 @@ def calcThis(T0, Ta=20, Th=1):
     # 4h analysis end time
     # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
     # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-    A,B,s, L2, XY, air = tntS.Solver(Elements,2000,Ta,T0,Th*60*60,500, 0.01)
+    A,B,s, L2, XY, air = tntS.Solver(Elements,2500,Ta,T0,Th*60*60,500, 0.01)
 
     # this returns:
     #  A vector of time for each step
@@ -166,6 +220,24 @@ def calcThis(T0, Ta=20, Th=1):
     plt.ylabel('Height [mm]')
 
     plt.tight_layout()
+
+    figG = plt.figure('Geometry thermal map ')
+    axG = figG.add_subplot(111, aspect='equal')
+    tntS.drawElements(axG,Elements,np.array(b[-1,:]))
+
+    
+    scatter = axG.scatter([element.x for element in Elements],
+                [element.y for element in Elements],
+                s=[element.T for element in Elements],
+                c=[element.T for element in Elements],
+                cmap=mpl.cm.jet, alpha=0.5)
+
+    # labels = [element.T-20 for element in Elements]
+    # tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=labels)
+    # mpld3.plugins.connect(figG, tooltip)
+
+    # mpld3.show()
+
     plt.show()
 
     return B,t
