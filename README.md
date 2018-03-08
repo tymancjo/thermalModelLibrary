@@ -179,7 +179,7 @@ plt.show()
 
 Running that with python3 we shall get the result window:
 
-![](redme01.png)
+![](redme01a.png)
 
 
 
