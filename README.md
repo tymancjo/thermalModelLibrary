@@ -1,6 +1,6 @@
 ## Thermal Network Library
 
-####Documentation file for the ==python== based library for solving heat distribution in air cooled electrical systems of conductors like switch gears, switch boards, distribution bars.
+#### Documentation file for the python based library for solving heat distribution in air cooled electrical systems of conductors like switch gears, switch boards, distribution bars.
 
 ## The concept
 
@@ -29,7 +29,7 @@ Used system defining methodology allows to build a 0 dimensional representation 
 To explain more in details how the solution approach is done it will be good to divide the entire process into some main steps:
 
 1. System definition
-   1. Definition of used materials ``` ```
+   1. Definition of used materials
    2. Definition of basic system components ( ***nodes*** )
    3. Definition of analysis object - by set of ***nodes***
 2. Solution definition
