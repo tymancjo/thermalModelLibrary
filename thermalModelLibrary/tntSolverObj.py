@@ -356,7 +356,7 @@ def drawElements(axis, Elements, Temperatures=None):
     plt.ylabel('Position [mm]')
     plt.xlabel('Position [mm]')
 
-    axis.set_title('Temp Rise Map')
+    # axis.set_title('Temp Rise Map')
 
     return my_patches
 

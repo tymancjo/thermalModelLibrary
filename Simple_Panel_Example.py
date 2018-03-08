@@ -56,7 +56,13 @@ VBB_hor_top = tntO.thermalElement(
         material = Cu)
 
 VBB_hor_btm = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,4,180),
+        shape = tntO.shape(10,100,50,2,180),
+        HTC = HTC,
+        emissivity = emmisivity,
+        material = Cu)
+
+MBB = tntO.thermalElement(
+        shape = tntO.shape(10,30,50,4,0),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
@@ -66,14 +72,15 @@ VBB_hor_btm = tntO.thermalElement(
 # this works like this:
 #  (nodeElement, Number of such elemnts in serial)
 PC_VBB =      [
-                (VBB, 4),
+                (MBB, 5),
+                (VBB, 3),
                 (VBB_hor_top, 2),
-                (VBB, 4),
+                (VBB, 3),
                 (ACB, 4),
-                (VBB, 4),
-                (VBB_hor_btm, 2),
                 (VBB, 2),
-                # (zwora, 6)
+                (VBB_hor_btm, 2), # Lashe for CT
+                (VBB, 1),
+                (zwora, 2)
                 ]
 
 # This function clone the nodeelemnts based in tuples above
@@ -101,7 +108,7 @@ tntS.nodePosXY(PC_VBB)
 # 4h analysis end time
 # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
 # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-A,B,s, L2, XY, air = tntS.Solver(PC_VBB,2500,20,20,4*60*60,500, 0.01)
+A,B,s, L2, XY, air = tntS.Solver(PC_VBB,2000,20,20,4*60*60,500, 0.01)
 
 # this returns:
 #  A vector of time for each step
@@ -130,14 +137,14 @@ b = b - 20
 fig = plt.figure('Temperature Rise Analysis ')
 
 # first subplot for the timecurves
-ax1 = fig.add_subplot(231)
+ax1 = fig.add_subplot(221)
 ax1.plot(t,b[:,:])
 ax1.set_title('Temp Rise vs. Time')
 plt.ylabel('Temp Rise [K]')
 plt.xlabel('Time [h]')
 
 # Temperature rises from lats timepoint along the 1D model length
-ax2 = fig.add_subplot(234)
+ax2 = fig.add_subplot(223)
 
 ax2.plot(b[-1,::-1],'rx--')
 ax2.set_title('Temp Rise vs. 1D position')
@@ -148,19 +155,20 @@ ax1.grid()
 ax2.grid()
 
 # Defining the subplot for geometry heat map
-ax3 = fig.add_subplot(132, aspect='equal')
+ax3 = fig.add_subplot(122, aspect='equal')
 # runs the defined procedure on this axis
 boxes = tntS.drawElements(ax3,PC_VBB,np.array(b[-1,:]))
 
-ax4 = fig.add_subplot(133)
+ax4 = ax3.twiny()
 if air:
-    ax4.plot(air.aCellsT, np.linspace(0,air.h,air.n) ,'b--')
+    ax4.plot(air.aCellsT, np.linspace(0,air.h,air.n) ,'b--', label='air')
 else:
-    ax4.plot(np.array([Ta(y) for y in np.linspace(0,max(L2),20)]), np.linspace(0,max(L2),20) ,'b--')
+    ax4.plot(np.array([Ta(y) for y in np.linspace(0,max(L2),20)]), np.linspace(0,max(L2),20) ,'b--', label='air')
 
-ax4.set_title('Air Temp vs. height')
-plt.xlabel('Air Temp [degC]')
-plt.ylabel('Height [mm]')
+ax4.plot([element.T for element in PC_VBB],[element.y for element in PC_VBB],'r--', label='nodes')
+
+plt.xlabel('Temp [degC]')
+plt.legend()
 
 plt.tight_layout()
 
