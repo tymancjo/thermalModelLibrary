@@ -1,6 +1,6 @@
 ## Thermal Network Library
 
-####Documentation file for the ==python== based library for solving heat distribution in air cooled electrical systems of conductors like switch gears, switch boards, distribution bars.
+#### Documentation file for the **python** based library for solving heat distribution in air cooled electrical systems of conductors like switch gears, switch boards, distribution bars.
 
 ## The concept
 
@@ -29,7 +29,7 @@ Used system defining methodology allows to build a 0 dimensional representation 
 To explain more in details how the solution approach is done it will be good to divide the entire process into some main steps:
 
 1. System definition
-   1. Definition of used materials ``` ```
+   1. Definition of used materials
    2. Definition of basic system components ( ***nodes*** )
    3. Definition of analysis object - by set of ***nodes***
 2. Solution definition
@@ -183,4 +183,94 @@ Running that with python3 we shall get the result window:
 
 
 
-### to be continued...
+Additionally each ***node*** element now have the following internal variables:
+
+- ***node***.x - x position in [mm]
+- ***node***.y - y position in [mm]
+- ***node***.T - node temperature from last time step (end of solve)
+
+### The solver general algorithm
+
+```flow
+st=>start: Start
+op1=>operation: Read solution settings
+op2=>operation: Prepare Air thermal model
+setT=>operation: set initial time
+setN=>operation: set 1st node
+el=>operation: solve node
+ne=>operation: set next node
+c1=>condition: all nodes done?
+test1=>operation: Check nodes results
+c2=>condition: All temp rises in allowed limit?
+c3=>condition: End time reached?
+nt=>operation: set new smaller time step
+nxt=>operation: set next time step
+e=>end
+
+st->op1->op2->setT->setN->el->c1
+c1(no)->ne(right)->el
+c1(yes)->c2
+c2(no)->nt(right)->setN
+c2(yes)->c3
+c3(no)->nxt(right)->setN
+c3(yes)->e
+```
+### Ambient temperature modeling in proximity of objects 
+
+### **a**pproximate **a**ir **s**teady **s**tate **s**tatic **m**odel  - **aasssm**
+
+What is this thing?
+
+In principle to solve the case for each ***node*** element in each time step it's necessary to:
+
+- calculate internal power generation ***Q~SRC~*** (ohmic losses plus defined additional power source)
+
+- calculate the power dissipated to air via convection ***Q~conv~***
+
+- calculate the power dissipated to air via radiation ***Q~rad~***
+
+- calculate the power transferred via conduction from previous nodes ***Q~IN~***
+
+- calculate the power transferred via conduction to next nodes ***Q~OUT~***
+
+- solve the summary power balance for this time step 
+
+  ***Q*** = ***Q~SRC~*** - ***Q~conv~*** - ***Q~rad~*** + ***Q~IN~*** - ***Q~OUT~***
+
+- get the energy delta in the time step:
+
+   ***E*** = ***Q*** ^.^ **$\Delta$time**  
+
+- base on the element mass and material properties calculate the temperature rise ***$\Delta$T***
+
+- if the result is smaller than the allowed by Solver configuration parameter we set the flag and move to next ***node*** element.
+
+- when we done with all of ***nodes*** and all nodes solutions are within allowable limits we proceed to next time step. If not we repeat this time step with reduced ***$\Delta$T***  
+
+For the calculations of ***Q~conv~*** and ***Q~rad~*** an ambient temperature value is needed. The simplest solution is to use a constant value of temperature. However for many cases this approach may be to simplified. In real scenario for devices that are enclosed in any type of enclosure we have air temperature being distributed vertically from coolest at the bottom to the hottest at the top. This is effect of the buoyancy force.  
+
+To be able to in some approximation simulate this solver can apply two approaches:
+
+-  Use a user defined ambient temperature as a function of height ***T~AMB~*** = ***f(h)*** 
+
+- Use solver internal ***aasssm*** mechanism. 
+
+The ***aasssm*** mechanism is activated if the solver parameter for ***T~AMB~*** is set to a numeric value.
+
+How it works:
+
+-  It's a static solution that is done before the transient solver starts. It's results is used for all further time steps.
+
+- Simulated System is analyzed to get the size in height.
+
+- 20 cells Air thermal network model is prepared for this height.
+
+- each ***node*** element is mapped to proper Air cell based on its y position.
+
+- Heat sources from each element are calculated (once) and added to Air heat input vector.
+
+- Based on the predefined thermal conductances each Air cell temperature is calculated.
+
+- To simulate (approximated) effect of temperature stratification the Air cell temperatures are sorted from coolest at the bottom to the hottest at the top.
+
+     
