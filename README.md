@@ -1,6 +1,8 @@
 ## Thermal Network Library
 
+
 #### Documentation file for the **python** based library for solving heat distribution in air cooled electrical systems of conductors like switch gears, switch boards, distribution bars.
+
 
 ## The concept
 
@@ -179,7 +181,8 @@ plt.show()
 
 Running that with python3 we shall get the result window:
 
-![](redme01.png)
+![](redme01a.png)
+
 
 
 
@@ -274,3 +277,4 @@ How it works:
 - To simulate (approximated) effect of temperature stratification the Air cell temperatures are sorted from coolest at the bottom to the hottest at the top.
 
      
+
