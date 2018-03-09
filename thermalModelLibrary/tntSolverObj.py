@@ -62,10 +62,11 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 	# if yes then use this as starting temperature (this allows continue calc from previous results)
 	# if no - we assume the T0
 
-	if elementsHaveT:
-		Temperatures = [x.T for x in Elements]  # array of temperatures iof elements in given timestep
-	else:
-		Temperatures = [T0 for x in Elements]  # array of temperatures iof elements in given timestep
+	if not elementsHaveT:
+		for element in Elements:
+			element.T = T0
+	
+	Temperatures = [x.T for x in Elements]  # array of temperatures iof elements in given timestep
 
 	# preparing some variables
 	GlobalTemperatures = [Temperatures] # array of temperature results
@@ -99,17 +100,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 		# later plan: do it on each step
 		# or mabe Lets start from this second plan :)
 
-	# lets assign initial T value for elements
-	# if the leemnts don't have set up initial conditions
 	
-	if not elementsHaveT: 
-		for element in Elements:
-			# Getting the Tamb for this element:
-			# Depending if this given by function of y or just value
-			if useF:
-				element.T = Tamb(element.y)
-
-
 	Time = [0]
 	SolverSteps = 0
 
