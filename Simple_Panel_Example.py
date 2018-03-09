@@ -110,7 +110,7 @@ for element in PC_VBB:
 # 4h analysis end time
 # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
 # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-A,B,s, L2, XY, air = tntS.Solver(PC_VBB,2000,20,20,4*60*60, 5, 0.01)
+A,B,s, L2, XY, air = tntS.Solver(PC_VBB,2000,20,20,8*60*60, 5, 0.01)
 
 # this returns:
 #  A vector of time for each step
