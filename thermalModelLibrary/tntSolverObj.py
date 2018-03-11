@@ -87,9 +87,15 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 		# generating sources to static solve Air
 		for element in Elements:
 			if element.current is not False:
-				air.addQ(element.y, element.Power(element.current, Tamb))
+				if callable(element.current):					
+					air.addQ(element.y, element.Power(element.current(EndTime/2), Tamb))
+				else:
+					air.addQ(element.y, element.Power(element.current, Tamb))
 			else:
-				air.addQ(element.y, element.Power(current, Tamb))
+				if callable(current):					
+					air.addQ(element.y, element.Power(current(EndTime/2), Tamb))
+				else:
+					air.addQ(element.y, element.Power(current, Tamb))
 
 		air.solveT(sortAir) # updating the Air temperature dist 1- sorted 0-unsorted by values from top
 		print(air.aCellsT)
@@ -138,10 +144,20 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 			# solve for internal heat generaion
 			# using element current if existing:
 			if element.current is not False:
-				Q = element.Power(element.current, elementPrevTemp)
+				# checking if the element current is a function
+				# if yes its assumed that is a f(time)
+				if callable(elemet.current):
+					Q = element.Power(element.current(Time[-1]), elementPrevTemp)
+				else:
+					Q = element.Power(element.current, elementPrevTemp)
+
 			else:
 				# if not using current delivered by solver
-				Q = element.Power(current, elementPrevTemp)
+				# checking if solver current is a function
+				if callable(current):					
+					Q = element.Power(current(Time[-1]), elementPrevTemp)
+				else:
+					Q = element.Power(current, elementPrevTemp)
 		
 			# solving for the convection heat taken out
 			Qconv = element.Qconv(elementPrevTemp, elementTamb)
