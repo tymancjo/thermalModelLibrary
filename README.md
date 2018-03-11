@@ -3,6 +3,7 @@
 
 #### Documentation file for the **python** based library for solving heat distribution in air cooled electrical systems of conductors like switch gears, switch boards, distribution bars.
 
+www version of this informations: https://sites.google.com/view/myfluxcapacitor/mad-man-toolbox/tml
 
 ## The concept
 
