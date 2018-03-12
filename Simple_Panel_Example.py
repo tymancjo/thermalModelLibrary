@@ -16,11 +16,11 @@ from thermalModelLibrary import tntSolverObj as tntS
 
 # Defining some materials
 Cu = tntO.Material(conductivity=56e6)
-CuACB = tntO.Material(conductivity=5e6)
+CuACB = tntO.Material(conductivity=7e6)
 
 # Defining some handy vallues
 # IP42 parameters 
-HTC = 3.75
+HTC = 6
 emmisivity = 0.35
 
 # Enviroment and starting point
@@ -72,7 +72,7 @@ MBB = tntO.thermalElement(
 # this works like this:
 #  (nodeElement, Number of such elemnts in serial)
 PC_VBB =      [
-                # (MBB, 5),
+                (MBB, 5),
                 (VBB, int(900/50)), # ~900mm
                 (ACB, 4),
                 (VBB, 4), # ~200mm
