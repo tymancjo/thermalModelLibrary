@@ -33,7 +33,7 @@ import math
 import copy
 
 # self made library for Air model
-from thermalModelLibrary import tntAir as tntA
+from thermalModelLibrary import tntPanelAir as tntA
 
 
 def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1, sortAir=True):
@@ -99,6 +99,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 
 		air.solveT(sortAir) # updating the Air temperature dist 1- sorted 0-unsorted by values from top
 		print(air.aCellsT)
+		print(air.Q)
 		Tamb = air.T
 
 		# for now, we just solve the air once before everything
@@ -146,7 +147,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 			if element.current is not False:
 				# checking if the element current is a function
 				# if yes its assumed that is a f(time)
-				if callable(elemet.current):
+				if callable(element.current):
 					Q = element.Power(element.current(Time[-1]), elementPrevTemp)
 				else:
 					Q = element.Power(element.current, elementPrevTemp)

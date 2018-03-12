@@ -18,12 +18,13 @@ from thermalModelLibrary import tntSolverObj as tntS
 Cu = tntO.Material(conductivity=56e6)
 CuACB = tntO.Material(conductivity=4.25e6, 
                       alpha=0)
+CuACB_F2_100 = tntO.Material(conductivity=5.5e6, 
+                      alpha=0)
 
 # Defining some handy vallues
 # IP42 parameters 
 HTC = 4.5
 emmisivity = 0.35
-
 
 
 
@@ -35,7 +36,15 @@ ACB = tntO.thermalElement(
         emissivity = emmisivity,
         dP = True,
         source = 0,
-        material = CuACB)
+        material = CuACB_F2_100)
+
+ACB_HS = tntO.thermalElement(
+        shape = tntO.shape(10,100,100,10,180), # one bar 40x10 50mm pointing right
+        HTC = HTC,
+        emissivity = emmisivity,
+        material = Cu,
+        dP = False,
+        source = 0)
 
 zwora = tntO.thermalElement(
         shape = tntO.shape(10,40,50,1,0), # one bar 40x10 50mm pointing right
@@ -44,7 +53,7 @@ zwora = tntO.thermalElement(
         material = Cu)
 
 VBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,50,4,-90), # 4 bars 40x10 100mm pointing down
+        shape = tntO.shape(10,40,50,8,-90), # 4 bars 40x10 100mm pointing down
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
@@ -56,13 +65,13 @@ VBB_hor_top = tntO.thermalElement(
         material = Cu)
 
 VBB_hor_btm = tntO.thermalElement(
-        shape = tntO.shape(100,10,65,1,180+45),
+        shape = tntO.shape(100,10,65,3,180+45),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
 
 MBB = tntO.thermalElement(
-        shape = tntO.shape(10,30,50,4,0),
+        shape = tntO.shape(10,35,50,6,0),
         HTC = HTC,
         emissivity = emmisivity,
         material = Cu)
@@ -72,25 +81,31 @@ MBB = tntO.thermalElement(
 # this works like this:
 #  (nodeElement, Number of such elemnts in serial)
 PC_VBB =      [
-                (MBB, 5),
+                (MBB, 8),
                 (VBB, int(900/50)), # ~900mm
                 (ACB, 4),
                 (VBB, 4), # ~200mm
                 (VBB_hor_btm, 2), # Lashe for CT ~130mm
                 (VBB, 4), # ~200mm
-                (zwora, 2)
+                # (zwora, 2)
                 ]
 
 # This function clone the nodeelemnts based in tuples above
 # and create final 1D list of elements 
 PC_VBB = tntS.generateList(PC_VBB) 
 
+HS = tntS.generateList([(ACB_HS, 1)])
+
 # As the solver base on objects of nodes only we need to prepare
 # for each of node element internal lists of
 # element before and elements after
 # its done below
 tntS.elementsForObjSolver(PC_VBB)
+tntS.elementsForObjSolver(HS)
 
+tntS.joinNodes(PC_VBB, HS, 26)
+
+PC_VBB.extend(HS)
 
 # Filling elements positions x,y in each elemnt object
 tntS.nodePosXY(PC_VBB)
@@ -116,7 +131,7 @@ def Ta(y):
 # 4h analysis end time
 # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
 # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-A,B,s, L2, XY, air = tntS.Solver(PC_VBB,2350,Ta,20,6*60*60, 5, 0.01, sortAir=False)
+A,B,s, L2, XY, air = tntS.Solver(PC_VBB,3850,Ta,20,6*60*60, 5, 0.01, sortAir=False)
 
 # this returns:
 #  A vector of time for each step
