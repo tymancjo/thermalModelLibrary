@@ -16,16 +16,12 @@ from thermalModelLibrary import tntSolverObj as tntS
 from thermalModelLibrary import elements as el
 
 # Defining some materials
-Cu = tntO.Material(conductivity=56e6)
 CuACB = tntO.Material(conductivity=7e6)
 
 # Defining some handy vallues
 # IP42 parameters 
 HTC = 6
 emmisivity = 0.35
-
-# Enviroment and starting point
-Tambient = 20
 
 
 # Defining analysis elements objects
@@ -38,66 +34,29 @@ ACB = tntO.thermalElement(
         source = 0,
         material = CuACB)
 
-zwora = tntO.thermalElement(
-        shape = tntO.shape(10,40,50,1,0), # one bar 40x10 50mm pointing right
-        HTC = HTC,
-        emissivity = emmisivity,
-        material = Cu)
+zwora = el.CT_1x100_F2
+zwora.shape.h = 50
 
-VBB = tntO.thermalElement(
-        shape = tntO.shape(10,40,50,4,-90), # 4 bars 40x10 100mm pointing down
-        HTC = HTC,
-        emissivity = emmisivity,
-        material = Cu)
+VBB = el.VBB_F2_2k5
 
-VBB_hor_top = tntO.thermalElement(
-        shape = tntO.shape(10,40,100,4,0),
-        HTC = HTC,
-        emissivity = emmisivity,
-        material = Cu)
+VBB_CT = el.CT_1x100_F2
+VBB_CT.rotate(-45)
 
-VBB_hor_btm = tntO.thermalElement(
-        shape = tntO.shape(100,10,65,1,180+45),
-        HTC = HTC,
-        emissivity = emmisivity,
-        material = Cu)
+MBB = el.SMB_12
 
-MBB = tntO.thermalElement(
-        shape = tntO.shape(10,30,50,4,0),
-        HTC = HTC,
-        emissivity = emmisivity,
-        material = Cu)
-
-
-# Defining the analysis circuit/objects connection stream
-# this works like this:
-#  (nodeElement, Number of such elemnts in serial)
-# PC_VBB =      [
-#                 (MBB, 5),
-#                 (VBB, int(900/50)), # ~900mm
-#                 (ACB, 4),
-#                 (VBB, 4), # ~200mm
-#                 (VBB_hor_btm, 2), # Lashe for CT ~130mm
-#                 (VBB, 4), # ~200mm
-#                 (zwora, 2)
-#                 ]
-
-# This function clone the nodeelemnts based in tuples above
-# and create final 1D list of elements 
-# PC_VBB = tntS.generateList(PC_VBB) 
-
+# New definition by: (Proto Node El, Length [mm], #nodes)
 PC_VBB =      [
                 (MBB, 500, 5),
-                (VBB, 900, 10), # ~900mm
+                (VBB, 900, 10), 
                 (ACB, 200, 4),
-                (VBB, 200, 4), # ~200mm
-                (VBB_hor_btm, 130, 3), # Lashe for CT ~130mm
-                (VBB, 200, 4), # ~200mm
+                (VBB, 200, 4), 
+                (VBB_CT, 130, 3), 
+                (VBB, 200, 4), 
                 (zwora, 100, 2)
                 ]
 
 
-
+# New function to generate final list
 PC_VBB = tntS.generateNodes(PC_VBB) 
 
 # As the solver base on objects of nodes only we need to prepare
@@ -114,7 +73,11 @@ tntS.nodePosXY(PC_VBB)
 for element in PC_VBB:
     element.y += 300
 
+# Enviroment and starting point
+Tambient = 20
 
+def Ta(y):
+    return Tambient
 
   
 # Running the solver for
@@ -125,7 +88,7 @@ for element in PC_VBB:
 # 4h analysis end time
 # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
 # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-A,B,s, L2, XY, air = tntS.Solver(PC_VBB,2000,20,20,8*60*60, 5, 0.01)
+A,B,s, L2, XY, air = tntS.Solver(PC_VBB,2000,Ta,20,8*60*60, 5, 0.01)
 
 # this returns:
 #  A vector of time for each step

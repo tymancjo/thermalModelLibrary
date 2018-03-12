@@ -367,6 +367,32 @@ def drawElements(axis, Elements, Temperatures=None):
 
     return my_patches
 
+def generateNodes(Input):
+	"""
+	This fucntion prepare the nodes base on the reference one 
+	for given lenght 
+	Input:
+	list of tuples
+	[(El, Len, nodes), (El2, Len2, nodes), ...]
+	where
+		El - reference element
+		Len - element lenght
+		nodes - required number of thermal nodes in lenght
+	"""
+	# preparing internal emptylist
+	output = []
+
+	# the main loop
+	for set in Input:
+		for i in range(set[2]):
+			tempEl = copy.deepcopy(set[0]) # Cloning the ref element
+			tempEl.shape.l = set[1] / set[2] # setting the new clone length
+			output.append(tempEl)
+
+	return output
+
+
+
 def generateList(Input):
 	"""
 	This functions return generated list of elements

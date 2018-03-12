@@ -110,7 +110,7 @@ class thermalElement:
 	HTC - Heat Transfer Coeff for the convection from the external area [W/m2K]
 	emmisivity - emissivity factor for the element surface
 	"""
-	def __init__(self, shape=shape(), material=Material(), source=0, dP=True, HTC=5, emissivity=0.35 ):
+	def __init__(self, shape=shape(), material=Material(), source=0, dP=True, HTC=5, emissivity=0.35, acPower=1 ):
 		
 		self.shape = shape  # as shape class object
 		self.material = material  # as material class object
@@ -118,6 +118,7 @@ class thermalElement:
 		self.dP = dP
 		self.HTC = HTC
 		self.emissivity = emissivity
+		self.acP = acPower
 		self.x = None
 		self.y = None 
 		self.T = False
@@ -150,7 +151,7 @@ class thermalElement:
 
 	def Power(self, current=0, temperature=20):
 		if self.dP:
-			return self.Q + self.R(temperature) * current**2
+			return self.Q + self.acP * self.R(temperature) * current**2
 		else:
 			return self.Q
 
@@ -179,3 +180,8 @@ class thermalElement:
 		"""
 		stBoltzConst = 5.6703e-8
 		return self.shape.RadiationArea() * stBoltzConst * self.emissivity * ((Temp + 273.15)**4  - (Tamb + 273.15)**4)
+
+	def rotate(self, a):
+		# Rorate element to given angle
+		# in degrees
+		self.shape.angle = a * math.pi / 180
