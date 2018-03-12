@@ -44,8 +44,8 @@ class airObject(object):
 	def resetQ(self):
 		self.Q *= 0
 
-	def addQ(self, Y, Qin):
-		self.Q[self.airCell(Y)] += Qin	
+	def addQ(self, Y, Qin, phases=3):
+		self.Q[self.airCell(Y)] += Qin * phases
 
 	def airCell(self, Y):
 		# pointing any Y to propper air cell number
@@ -57,7 +57,7 @@ class airObject(object):
 		# function returning the temperature at given height
 		return self.aCellsT[self.airCell(Y)]
 
-	def setG(self, Gup=5, Gdwn=1, Gout=1):
+	def setG(self, Gup=5, Gdwn=1, Gout=0.25):
 	# def setG(self, Gup=0, Gdwn=0, Gout=1):
 		# Gup is thermal cond to the top
 		# Gdwn is thermal cond down

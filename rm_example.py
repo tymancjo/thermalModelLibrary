@@ -22,7 +22,10 @@ tntS.elementsForObjSolver(Elements)
 
 tntS.nodePosXY(Elements)
 
-t,T,stp, linpos, XYpos, air = tntS.Solver(Elements, 2000, 20, 20, 4*60*60, 500, 0.01)
+def Ta(y):
+	return 20
+
+t,T,stp, linpos, XYpos, air = tntS.Solver(Elements, 2000, Ta, 20, 4*60*60, 500, 0.01, sortAir=True)
 
 
 # Rest is just cleaning up data for plotting
@@ -56,6 +59,13 @@ ax2.grid()
 ax3 = fig.add_subplot(122, aspect='equal')
 # runs the defined procedure on this axis to draw the shape
 tntS.drawElements(ax3,Elements,np.array(b[-1,:]))
+
+# elementsY = [element.y for element in Elements]
+# ambientY = [air.T(y) for y in elementsY]
+
+# ax4 = ax3.twiny()
+
+# ax4.plot(ambientY, elementsY)
 
 plt.tight_layout()
 plt.show()
