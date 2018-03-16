@@ -46,26 +46,36 @@ def PanelSolver(Panels, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
 
 	# to be able to do anything further need to set the XY positions for all elements in all panels to do so we need to make sure we will set properly the between panels connections.
 
-	if len(Panels) > 0: # If there is more than one panel
 
-		for idx,this_panel in enumerate(Panels):
+	for idx,this_panel in enumerate(Panels):
 
-			# This should take care of binding elements between panels
-			if idx > 0: # if this is not the first one
-				prev_panel = Panels[idx-1]
-				# Current panel input takes prev output
-				this_panel.In.inputs.append(prev_panel.Out) 
-				# previous output takes this input
-				prev_panel.Out.outputs.append(this_panel.In)
+		# This should take care of binding elements between panels
+		if idx > 0: # if this is not the first one
+			prev_panel = Panels[idx-1]
+			# Current panel input takes prev output
+			this_panel.In.inputs.append(prev_panel.Out) 
+			# previous output takes this input
+			prev_panel.Out.outputs.append(this_panel.In)
 
-			if idx < len(Panels)-1: # if this is not the last one
-				next_panel = Panels[idx+1]
-				# Current panel output takes next input
-				this_panel.Out.outputs.append(next_panel.In) 
-				# Next panel input takes this output
-				next_panel.In.inputs.append(this_panel.Out)
-			
-			Elements.extend(this_panel.nodes)
+		if idx < len(Panels)-1: # if this is not the last one
+			next_panel = Panels[idx+1]
+			# Current panel output takes next input
+			this_panel.Out.outputs.append(next_panel.In) 
+			# Next panel input takes this output
+			next_panel.In.inputs.append(this_panel.Out)
+		
+		Elements.extend(this_panel.nodes)
+
+		# debug print
+		print('In:',Elements.index(this_panel.In),' Out:',Elements.index(this_panel.Out))
+
+	
+	for x,this_panel in enumerate(Panels):
+		if len(this_panel.In.inputs) > 0:
+			print(x,' InIn:',Elements.index(this_panel.In.inputs[-1]))
+		
+		if len(this_panel.Out.outputs) > 0:
+			print(x,' OutOut:',Elements.index(this_panel.Out.outputs[-1]))
 
 	# Having the final list of elements we calculate the total XY
 	# Filling elements positions
@@ -241,8 +251,23 @@ def nodePosXY(Elements, base=300):
 	Elements[0].x = 0
 	Elements[0].y = 0
 
+	idx = 0
 	for element in Elements:
-		
+
+		if len(element.inputs) > 0:
+			inputs = Elements.index(element.inputs[-1])
+			xx = element.inputs[-1].x
+			# x1 = Elements.index(element.outputs[0])
+		else:
+			inputs = "nic"
+			xx = "nic"
+			x1 = "nic"
+
+		print(idx,':', inputs,':',xx,':',x1)
+		idx += 1
+
+
+
 		if len(element.inputs) == 0 or element is Elements[0]:
 			if element.x == 0:
 				element.x = element.shape.getPos()['x'] / 2
@@ -256,7 +281,7 @@ def nodePosXY(Elements, base=300):
 
 		minY = min(minY, element.y)
 
-	# making shift to put onject minY to 0
+	# making shift to put object minY to base
 	for element in Elements:
 		element.y = element.y - minY + base
 		

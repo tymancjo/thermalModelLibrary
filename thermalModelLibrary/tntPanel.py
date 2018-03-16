@@ -79,8 +79,8 @@ class PCPanel:
 			self.nodes.append(clone)
 			
 			# fixing the original node
-			node.inputs = temp_inputs
-			node.outputs = temp_outputs
+			node.inputs = copy.copy(temp_inputs)
+			node.outputs = copy.copy(temp_outputs)
 
 
 		# this leaves the input and outputs of the nodes
@@ -116,6 +116,9 @@ class PCPanel:
 		# to the adequate cloned nodes
 		in_idx = Nds.index(self.In)
 		out_idx = Nds.index(self.Out)
+
+		self.In = None
+		self.Out = None
 
 		self.In = self.nodes[in_idx]
 		self.Out = self.nodes[out_idx]

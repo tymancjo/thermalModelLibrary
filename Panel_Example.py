@@ -148,10 +148,22 @@ Panel3 = tntP.PCPanel(Nodes=Elements,
                  In=PC_MBB_1[0], 
                  Out=PC_MBB_2[-1], 
                  OutCurrent=0,
-                 Air=None, T0=120)
+                 Air=None, T0=50)
+
+Panel4 = tntP.PCPanel(Nodes=Elements,
+                 In=PC_MBB_1[0], 
+                 Out=PC_MBB_2[-1], 
+                 OutCurrent=0,
+                 Air=None, T0=20)
+
+Panel5 = tntP.PCPanel(Nodes=Elements,
+                 In=PC_MBB_1[0], 
+                 Out=PC_MBB_2[-1], 
+                 OutCurrent=0,
+                 Air=None, T0=70)
 
 
-Panels = [Panel, Panel2, Panel3]
+Panels = [Panel2, Panel, Panel3, Panel4, Panel5]
 
 
 
