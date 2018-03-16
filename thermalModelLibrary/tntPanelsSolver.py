@@ -49,7 +49,7 @@ def PanelSolver(Panels, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
 	if len(Panels) > 0: # If there is more than one panel
 
 		for idx,this_panel in enumerate(Panels):
-			
+
 			# This should take care of binding elements between panels
 			if idx > 0: # if this is not the first one
 				prev_panel = Panels[idx-1]
@@ -241,9 +241,9 @@ def nodePosXY(Elements, base=300):
 	Elements[0].x = 0
 	Elements[0].y = 0
 
-	
 	for element in Elements:
-		if len(element.inputs) == 0:
+		
+		if len(element.inputs) == 0 or element is Elements[0]:
 			if element.x == 0:
 				element.x = element.shape.getPos()['x'] / 2
 			if element.y == 0:

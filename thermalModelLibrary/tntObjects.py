@@ -120,14 +120,14 @@ class thermalElement:
 		self.emissivity = emissivity
 		self.acP = acPower
 		self.x = None
-		self.y = None 
+		self.y = None
 		self.T = False
 		# input marked neighbour elements
 		self.inputs = []
 		# output marked neighbour elements
 		self.outputs = []
 		# current for per branch currents aplication
-		self.currnen = False
+		self.current = False
 
 
 	def mass(self):

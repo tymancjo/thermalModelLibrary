@@ -137,7 +137,6 @@ Panel = tntP.PCPanel(Nodes=Elements,
                  OutCurrent=0,
                  Air=None, T0=20)
 
-
 Panel2 = tntP.PCPanel(Nodes=PC_MBB_3,
                  In=PC_MBB_3[0], 
                  Out=PC_MBB_3[-1], 
@@ -145,9 +144,16 @@ Panel2 = tntP.PCPanel(Nodes=PC_MBB_3,
                  Air=None, T0=20)
 
 
+Panel3 = tntP.PCPanel(Nodes=Elements,
+                 In=PC_MBB_1[0], 
+                 Out=PC_MBB_2[-1], 
+                 OutCurrent=0,
+                 Air=None, T0=120)
 
 
-Panels = [Panel, Panel2]
+Panels = [Panel, Panel2, Panel3]
+
+
 
 Time, T, Stp, Nodes = tntS.PanelSolver(Panels, 20, 1*60*60, 
                 iniTimeStep = 1,
