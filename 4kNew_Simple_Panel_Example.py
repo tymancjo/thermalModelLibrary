@@ -25,17 +25,17 @@ emmisivity = 0.35
 
 
 # Defining analysis elements objects
-ACB = el.EG_F2
+ACB = el.EG_F2_100
 
-zwora = el.CT_1x100_F2
+zwora = el.CT_2x100_F2
 zwora.shape.h = 50
 
-VBB = el.VBB_F2_2k5
+VBB = el.VBB_F2_4k
 
-VBB_CT = el.CT_2x100_F2
+VBB_CT = el.CT_3x100_F2
 VBB_CT.rotate(-45)
 
-MBB = el.SMB_12
+MBB = el.SMB_21
 
 # New definition by: (Proto Node El, Length [mm], #nodes)
 PC_VBB =      [
@@ -70,7 +70,7 @@ for element in PC_VBB:
 Tambient = 20
 
 def Ta(y):
-    return Tambient + (55/2000) * y
+    return Tambient 
 
   
 # Running the solver for
@@ -81,7 +81,7 @@ def Ta(y):
 # 4h analysis end time
 # 500s as the default and max timestep size - this is auto reduced when needed - see tntS.Solver object
 # 0.01K maximum allowed temperature change in single timestep - otherwise solution accuracy - its used for auto timestep selection 
-A,B,s, L2, XY, air = tntS.Solver(PC_VBB,2500,Tambient,20,8*60*60, 5, 0.01)
+A,B,s, L2, XY, air = tntS.Solver(PC_VBB,3600,Tambient,20,8*60*60, 5, 0.01)
 
 # this returns:
 #  A vector of time for each step
@@ -103,7 +103,7 @@ t = t / (60*60) # Time in hours
 
 # preparing temp rises as results
 b = np.array(B)
-b = b - 20
+b = b - Tambient
 
 
 # defining the main plot window

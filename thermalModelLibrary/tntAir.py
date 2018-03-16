@@ -57,7 +57,7 @@ class airObject(object):
 		# function returning the temperature at given height
 		return self.aCellsT[self.airCell(Y)]
 
-	def setG(self, Gup=5, Gdwn=1, Gout=0.25):
+	def setG(self, Gup=5, Gdwn=0, Gout=2):
 	# def setG(self, Gup=0, Gdwn=0, Gout=1):
 		# Gup is thermal cond to the top
 		# Gdwn is thermal cond down

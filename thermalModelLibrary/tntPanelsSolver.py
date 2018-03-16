@@ -13,10 +13,10 @@ plan of algorithm:
 	loop over time
 		loop over elements
 			figuring out Energy in element
-			- solve elements for DT from interal heat (based on prev T)
+			- solve elements for DT from internal heat (based on prev T)
 			- solve for heat conduction from prev and next (based on prev T)
 			- solve for heat transmitted via convection (based on prev T)
-			- solve for heat transmited by radiation (based on previous T)
+			- solve for heat transmitted by radiation (based on previous T)
 
 			Having the total heat in element -> calculate energy -> calculate DT
 			calculate Temperature = Previous temp + DT
@@ -34,29 +34,63 @@ import copy
 
 # self made library for Air model
 from thermalModelLibrary import tntAir as tntA
+from thermalModelLibrary import tntPanel as tntP
 
 
-def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1, sortAir=True):
+def PanelSolver(Panels, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
+	# Preparing list to capture all elements
+	Elements = []
 
-	# # Filling the element.inputs and element.output lists
-	# elementsForObjSolver(Elements) 
-	# # Preparing some geometry data for each node element
-	# # Calculating the each node 2D position based on the Elements vector
-	# # XY = nodePosXY(Elements)
-	
-	# # calulating each element x and y
-	# nodePosXY(Elements)
-	
-	# we will use this same loop as well to check if all elements have already T set
+	# first we need to prepare our system to be solved as separate panels
+	# We will go over panels we got and make required things.
+
+	# to be able to do anything further need to set the XY positions for all elements in all panels to do so we need to make sure we will set properly the between panels connections.
+
+	if len(Panels) > 0: # If there is more than one panel
+
+		for idx,this_panel in enumerate(Panels):
+			
+			# This should take care of binding elements between panels
+			if idx > 0: # if this is not the first one
+				prev_panel = Panels[idx-1]
+				# Current panel input takes prev output
+				this_panel.In.inputs.append(prev_panel.Out) 
+				# previous output takes this input
+				prev_panel.Out.outputs.append(this_panel.In)
+
+			if idx < len(Panels)-1: # if this is not the last one
+				next_panel = Panels[idx+1]
+				# Current panel output takes next input
+				this_panel.Out.outputs.append(next_panel.In) 
+				# Next panel input takes this output
+				next_panel.In.inputs.append(this_panel.Out)
+			
+			Elements.extend(this_panel.nodes)
+
+	# Having the final list of elements we calculate the total XY
+	# Filling elements positions
+	nodePosXY(Elements)
+
+	for this_panel in Panels:
+			# Now we can solve Air for each Panel preparing for thermal solving
+			for node in this_panel.nodes: # For each node in this panel
+				# Collecting all input power to Air model 
+				this_panel.Air.addQ(node.y, node.Power(node.current, T0))
+
+				# And we make a reference in each node to the panel 
+				# air model
+				node.air = this_panel.Air
+
+			# Having all the input for this panel Air we can solve it
+			this_panel.Air.solveT(1) # Solving with sorting
+
+
+	# Preparing the starting temperatures 
 	elementsHaveT = True
-
-	# and we will capture maxY value
-	maxY = 0
 	for element in Elements:
-		maxY = max(maxY, element.y)
-
 		if not element.T:
 			elementsHaveT = False
+			break
 
 	# Checking if Elements have already a internal temperature not eq to Null
 	# if yes then use this as starting temperature (this allows continue calc from previous results)
@@ -70,43 +104,6 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 
 	# preparing some variables
 	GlobalTemperatures = [Temperatures] # array of temperature results
-
-	# Checking if the delivered Tamb is a function or a value
-	# if it is a function, each element will have Tamb = f(element y position)
-	# else is just a value
-	if callable(Tamb):
-		print('Tamb is a function')
-		useF = True
-		air = None
-
-	else:
-		# we create air based on library
-		useF = True
-		air = tntA.airObject( 90, 1.1 * maxY, Tamb)
-
-		# generating sources to static solve Air
-		for element in Elements:
-			if element.current is not False:
-				if callable(element.current):					
-					air.addQ(element.y, element.Power(element.current(EndTime/2), Tamb))
-				else:
-					air.addQ(element.y, element.Power(element.current, Tamb))
-			else:
-				if callable(current):					
-					air.addQ(element.y, element.Power(current(EndTime/2), Tamb))
-				else:
-					air.addQ(element.y, element.Power(current, Tamb))
-
-		air.solveT(sortAir) # updating the Air temperature dist 1- sorted 0-unsorted by values from top
-		print(air.aCellsT)
-		Tamb = air.T
-
-		# for now, we just solve the air once before everything
-		# based only on the internal heat generation
-		# later plan: do it on each step
-		# or mabe Lets start from this second plan :)
-
-	
 	Time = [0]
 	SolverSteps = 0
 
@@ -119,11 +116,11 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 
 		if timestepValid:
 			deltaTime = iniTimeStep # just to be ready for non cons timestep
-			proposedDeltaTime = []  # keeper for calculated new delata time reset
+			proposedDeltaTime = []  # keeper for calculated new delta time reset
 		else:
-			# deltaTime /= 2 # we drop down deltatime by half
-			deltaTime = min(proposedDeltaTime) # choosing minimumum step from previous calculations for all elements that didnt meet accuracy
-			proposedDeltaTime = []  # keeper for calculated new delata time reset
+			# deltaTime /= 2 # we drop down delta time by half
+			deltaTime = min(proposedDeltaTime) # choosing minimum step from previous calculations for all elements that didn't meet accuracy
+			proposedDeltaTime = []  # keeper for calculated new delta time reset
 
 		currentStepTemperatures = [] # empty array to keep this timestep
 
@@ -133,11 +130,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 		for element in Elements:
 			# Getting the Tamb for this element:
 			# Depending if this given by function of y or just value
-			if useF:
-				elementTamb = Tamb(element.y)
-			else:
-				elementTamb = Tamb
-
+			elementTamb = element.air.T(element.y)
 
 			# capturing the previous element temperature
 			elementPrevTemp = element.T
@@ -146,7 +139,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 			if element.current is not False:
 				# checking if the element current is a function
 				# if yes its assumed that is a f(time)
-				if callable(elemet.current):
+				if callable(element.current):
 					Q = element.Power(element.current(Time[-1]), elementPrevTemp)
 				else:
 					Q = element.Power(element.current, elementPrevTemp)
@@ -226,7 +219,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 				element.T = GlobalTemperatures[-1][index]
 
 
-	return Time, GlobalTemperatures, SolverSteps, nodePositions(Elements), None, air
+	return Time, GlobalTemperatures, SolverSteps, Elements
 
 
 def nodePositions(Elements):
@@ -238,7 +231,7 @@ def nodePositions(Elements):
     pos.insert(0,Elements[0].shape.l/2)
     return [sum(pos[0:x]) for x in range(1,len(pos)+1)]
 
-def nodePosXY(Elements):
+def nodePosXY(Elements, base=300):
 	"""
 	This claculates the pairs of x,y position for each node element
 	and store this positions in each node object internal x,y 
@@ -265,7 +258,7 @@ def nodePosXY(Elements):
 
 	# making shift to put onject minY to 0
 	for element in Elements:
-		element.y = element.y - minY
+		element.y = element.y - minY + base
 		
 
 

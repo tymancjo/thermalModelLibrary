@@ -77,7 +77,7 @@ def Solver(Elements, current, Tamb, T0, EndTime, iniTimeStep = 1, tempStepAccura
 	else:
 		# we create air based on library
 		useF = True
-		air = tntA.airObject( 20, 1.1 * maxY, Tamb)
+		air = tntA.airObject( 40, 1.1 * maxY, Tamb)
 
 		for element in Elements:
 			air.addQ(element.y, element.Power(current, Tamb))
