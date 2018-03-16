@@ -139,7 +139,7 @@ class thermalElement:
 		Inputs:
 		temperature - calculation temperature in degC
 		"""	
-		return self.shape.getR(self.material.conductivity(temperature))
+		return self.acP * self.shape.getR(self.material.conductivity(temperature))
 
 	def Rth(self, temperature=20):
 		"""
@@ -151,7 +151,7 @@ class thermalElement:
 
 	def Power(self, current=0, temperature=20):
 		if self.dP:
-			return self.Q + self.acP * self.R(temperature) * current**2
+			return self.Q + self.R(temperature) * current**2
 		else:
 			return self.Q
 

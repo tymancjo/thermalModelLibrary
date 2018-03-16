@@ -98,76 +98,36 @@ PC_VBB =      [
 PC_VBB_1 = tntS.generateList(PC_VBB) 
 # Filling the element.inputs and element.output lists
 
-PC_VBB_2 = tntS.generateList(PC_VBB) 
-# Filling the element.inputs and element.output lists
-
 PC_MBB = [
-            (MBB,5)
+            (MBB,10)
         ] 
 
 PC_MBB_1 = tntS.generateList(PC_MBB) 
-PC_MBB_2 = tntS.generateList(PC_MBB) 
-
-PC_MBB_3 = tntS.generateList(PC_MBB) 
-
-
-tntS.elementsForObjSolver(PC_MBB_1, 0)
-tntS.elementsForObjSolver(PC_VBB_1, 2500)
-tntS.elementsForObjSolver(PC_MBB_2, 2500)
-
-tntS.elementsForObjSolver(PC_VBB_2, 1500)
-tntS.elementsForObjSolver(PC_MBB_3, 1000)
-
-# Making thermal connections between lists of elements (branches)
-tntS.joinNodes(PC_MBB_1, PC_VBB_1, -1)
-tntS.joinNodes(PC_MBB_1, PC_MBB_2, -1)
-# tntS.joinNodes(PC_MBB_2, PC_MBB_3, -1)
-
-# tntS.joinNodes(PC_MBB_2, PC_VBB_2, -1)
-
-# creating total list of all elements
-Elements = []
-Elements.extend(PC_MBB_1)
-Elements.extend(PC_VBB_1)
-Elements.extend(PC_MBB_2)
-
-Panel = tntP.Panel(Nodes=Elements,
-                 In=PC_MBB_1[0], 
-                 Out=PC_MBB_2[-1], 
-                 OutCurrent=0,
-                 Air=None, T0=20)
-
-Panel2 = tntP.Panel(Nodes=PC_MBB_3,
-                 In=PC_MBB_3[0], 
-                 Out=PC_MBB_3[-1], 
-                 OutCurrent=0,
-                 Air=None, T0=20)
-
-
-Panel3 = tntP.Panel(Nodes=Elements,
-                 In=PC_MBB_1[0], 
-                 Out=PC_MBB_2[-1], 
-                 OutCurrent=0,
-                 Air=None, T0=50)
-
-Panel4 = tntP.Panel(Nodes=Elements,
-                 In=PC_MBB_1[0], 
-                 Out=PC_MBB_2[-1], 
-                 OutCurrent=0,
-                 Air=None, T0=20)
-
-Panel5 = tntP.Panel(Nodes=Elements,
-                 In=PC_MBB_1[0], 
-                 Out=PC_MBB_2[-1], 
-                 OutCurrent=0,
-                 Air=None, T0=70)
-
-
-Panels = [Panel2, Panel, Panel3, Panel4, Panel5]
 
 
 
-Time, T, Stp, Nodes = tntS.PanelSolver(Panels, 20, 1*60*60, 
+Panel = tntP.PCPanel(MBB=PC_MBB_1,
+                     VBB=PC_VBB_1,
+                     Load=False,
+                     Air=None,
+                     T0=20)
+
+Panel.setCurrent(1000)
+
+Panel2 = tntP.PCPanel(MBB=PC_MBB_1,
+                     VBB=PC_VBB_1,
+                     Load=False,
+                     Air=None,
+                     T0=20)
+
+Panel2.setCurrent(1000)
+
+
+Panels = [Panel, Panel2]
+
+
+
+Time, T, Stp, Nodes = tntS.PanelSolver(Panels, 20, 4*60*60, 
                 iniTimeStep = 1,
                 tempStepAccuracy = 0.1)
 
@@ -223,13 +183,11 @@ scatter = axG.scatter([element.x for element in Nodes],
             c=[element.T for element in Nodes],
             cmap=mpl.cm.jet, alpha=0.5)
 
-# labels = [element.T-20 for element in Elements]
-# tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=labels)
-# mpld3.plugins.connect(figG, tooltip)
 
-# mpld3.show()
 
 plt.show()
+
+
 
 # Function that describe ambient change with height
 def ambientT(y, Q=0, T0 = 20):

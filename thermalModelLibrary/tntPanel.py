@@ -31,7 +31,7 @@ import copy
 from thermalModelLibrary import tntAir as tntA
 from thermalModelLibrary.tntObjects import * 
 
-class PCPanel:
+class Panel:
 	"""docstring for Panel"""
 
 	def __init__(self, Nodes, In, Out, OutCurrent, Air=None, T0=20):
@@ -125,3 +125,95 @@ class PCPanel:
 
 		# this should finalize making copy for all nodes
 
+class PCPanel(object):
+	"""docstring for PCPanel"""
+	def __init__(self, MBB, VBB, Load=False, Air=None, T0=20):
+		# super(Panel, self).__init__() # I don't know yet how to use this
+		self.T0 = T0
+		self.Air = Air
+		self.Load = Load
+
+		self.setup()
+
+		# MBB - list of nodes that describe MBB
+		# VBB - list of nodes that describe VBB
+
+		# Making independent clone of MBB nodes
+		# and making internal links
+		self.MBB = self.prepareNodes(self.cloneNodes(MBB))
+
+		# the same for VBB
+		if len(VBB) > 0:
+			self.VBB = self.prepareNodes(self.cloneNodes(VBB))
+
+		# Setting up the interface points
+		self.In = self.MBB[0]
+		self.Out = self.MBB[-1]
+
+		# finding middle of MBB list to attach VBB
+		half = int(len(MBB)/2) - 1
+		
+
+		# joining the MBB and VBB
+		if len(VBB) > 0:
+			self.MBB[half].outputs.append(self.VBB[0])
+			self.VBB[0].inputs.append(self.MBB[half])
+
+		# making two MBB list for easier manage
+		self.MBB0 = self.MBB[:half+1]
+		self.MBB1 = self.MBB[half+1:]
+
+		print(len(self.MBB),len(self.MBB0), len(self.MBB1))
+
+		# Preparing final internal list of nodes
+		# To be compatible with solver
+
+		self.nodes = []
+		self.nodes.extend(self.MBB0)
+		if len(VBB) > 0:
+			self.nodes.extend(self.VBB)
+		self.nodes.extend(self.MBB1)
+
+
+	def setCurrent(self, current):
+		for node in self.nodes:
+			node.current = current
+
+	def setup(self):
+		
+		# Checking if Air object is defined
+		if not isinstance(self.Air, tntA.airObject):
+			self.Air = tntA.airObject(100, 2200, self.T0) # Creating Air 2.2m 20C	
+
+	def cloneNodes(self, Nodes):
+		output = []
+
+		for node in Nodes:
+			temp_inputs = node.inputs
+			temp_outputs = node.outputs
+
+			node.inputs = []
+			node.outputs = []
+
+			output.append(copy.deepcopy(node))
+
+			node.inputs = temp_inputs 
+			node.outputs = temp_outputs
+			 
+			temp_inputs = None
+			temp_outputs = None
+		
+		return output
+
+	def prepareNodes(self, Elements):
+		# This procedure update the Elements list 
+		# to introduce each element neigbours into propper internal lists
+	
+		for index, element in enumerate(Elements):
+			
+			if index > 0:
+				element.inputs.append(Elements[index-1])
+			if index < len(Elements)-1:
+				element.outputs.append(Elements[index+1]) 
+
+		return Elements
