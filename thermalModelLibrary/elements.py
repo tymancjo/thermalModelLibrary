@@ -8,6 +8,7 @@ from thermalModelLibrary import tntObjects as tntO
 Cu = tntO.Material(conductivity=56e6)
 F2_CuACB = tntO.Material(conductivity=4.25e6, alpha=0)
 F2_100_CuACB = tntO.Material(conductivity=5.5e6, alpha=0)
+F3_CuACB = tntO.Material(conductivity=9.5e6, alpha=0)
 
 # F2 ACBs
 EG_F2 = tntO.thermalElement(
@@ -28,6 +29,16 @@ EG_F2_100 = tntO.thermalElement(
         source = 0,
         material = F2_100_CuACB)
 
+# Frame 3 ACBs
+
+EG_F3 = tntO.thermalElement(
+        # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
+        shape = tntO.shape(20,100,200,1,-90), 
+        HTC = 6,
+        emissivity = 0.35,
+        dP = True,
+        source = 0,
+        material = F3_CuACB)
 
 # Horizontal Busbars Systems
 SMB_6 = tntO.thermalElement(
@@ -73,7 +84,7 @@ SMB_14 = tntO.thermalElement(
 SMB_21 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,35,1000,6,0), 
-        HTC = 6,
+        HTC = 4.0,
         emissivity = 0.35,
         dP = True,
         source = 0,
@@ -200,4 +211,14 @@ CT_3x100_F2 = tntO.thermalElement(
         source = 0,
         material = Cu,
         acPower = 2.58)
+
+CT_2x40 = tntO.thermalElement(
+        # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
+        shape = tntO.shape(10,40,1000,2,-90), 
+        HTC = 6,
+        emissivity = 0.35,
+        dP = True,
+        source = 0,
+        material = Cu,
+        acPower = 1.41)
 

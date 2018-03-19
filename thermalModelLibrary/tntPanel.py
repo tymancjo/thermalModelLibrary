@@ -145,6 +145,8 @@ class PCPanel(object):
 		# the same for VBB
 		if len(VBB) > 0:
 			self.VBB = self.prepareNodes(self.cloneNodes(VBB))
+		else:
+			self.VBB = VBB
 
 		# Setting up the interface points
 		self.In = self.MBB[0]
@@ -157,7 +159,9 @@ class PCPanel(object):
 		# joining the MBB and VBB
 		if len(VBB) > 0:
 			self.MBB[half].outputs.append(self.VBB[0])
-			self.VBB[0].inputs.append(self.MBB[half])
+			# self.VBB[0].inputs.append(self.MBB[half])
+			# Just a try it should be generally the same thing
+			self.VBB[0].inputs = [self.MBB[half]]
 
 		# making two MBB list for easier manage
 		self.MBB0 = self.MBB[:half+1]
@@ -178,6 +182,20 @@ class PCPanel(object):
 	def setCurrent(self, current):
 		for node in self.nodes:
 			node.current = current
+
+	def set3I(self,Iin,Iout,Ifeeder):
+		# Fill currents info in each branch nodes
+
+		for node in self.MBB0:
+			node.current = Iin
+		
+		for node in self.MBB1:
+			node.current = Iout
+
+		if len(self.VBB) > 0:
+			for node in self.VBB:
+				node.current = Ifeeder
+
 
 	def setup(self):
 		

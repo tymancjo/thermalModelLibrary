@@ -24,6 +24,7 @@ plan of algorithm:
 # Importing external library
 import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
 import matplotlib.patches as patches
+import matplotlib.lines as mlines
 from matplotlib.collections import PatchCollection
 import matplotlib as mpl
 import numpy as np
@@ -289,7 +290,7 @@ def nodePosXY(Elements, base=300):
 
 
 
-def drawElements(axis, Elements, Temperatures=None):
+def drawElements(axis, Elements, Temperatures=None, Text=False, T0=25):
     """
     This method draws a result as a defined shape
     """
@@ -338,11 +339,25 @@ def drawElements(axis, Elements, Temperatures=None):
 
             # Drawig the rectangle
             r = patches.Rectangle(
-                    # (min(rx,rx+l), ry - cosin*(shapeH/2)),     # (x,y)
                     (rx , ry),			    # (x,y)
                     shapeW,				    # width
                     shapeH,    				# height
                 )
+
+            # adding info text if needed.
+            # calculating tx ty text positions
+            if Text:
+	            # tx = element.x - math.sin(angle)*max(shapeH, shapeW)
+	            # ty = element.y + math.cos(angle)*max(shapeH, shapeW)
+	            tx = element.x 
+	            ty = element.y 
+	            txt = '{}K'.format(round(element.T-T0,0))
+	            
+	            # l = mlines.Line2D([rx,tx], [ry,ty])
+	            # axis.add_line(l)
+	            trot = (180/math.pi)*element.shape.angle + 90
+	            axis.text(tx, ty, txt, fontsize=6, rotation=trot)
+
 
             # Adding the rectangle shape into array
             # to display it later on plot
@@ -460,4 +475,5 @@ def joinNodes(ListA, ListB, JointPosInA):
 	#  [-1]	
 
 	ListA[JointPosInA].outputs.append(ListB[0])
-	ListB[0].inputs.append(ListA[JointPosInA])
+	# ListB[0].inputs.append(ListA[JointPosInA])
+	ListB[0].inputs = [ListA[JointPosInA]]
