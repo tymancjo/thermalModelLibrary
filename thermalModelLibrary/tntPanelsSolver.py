@@ -68,15 +68,15 @@ def PanelSolver(Panels, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
 		Elements.extend(this_panel.nodes)
 
 		# debug print
-		print('In:',Elements.index(this_panel.In),' Out:',Elements.index(this_panel.Out))
+		# print('In:',Elements.index(this_panel.In),' Out:',Elements.index(this_panel.Out))
 
 	
-	for x,this_panel in enumerate(Panels):
-		if len(this_panel.In.inputs) > 0:
-			print(x,' InIn:',Elements.index(this_panel.In.inputs[-1]))
+	# for x,this_panel in enumerate(Panels):
+	# 	if len(this_panel.In.inputs) > 0:
+	# 		print(x,' InIn:',Elements.index(this_panel.In.inputs[-1]))
 		
-		if len(this_panel.Out.outputs) > 0:
-			print(x,' OutOut:',Elements.index(this_panel.Out.outputs[-1]))
+	# 	if len(this_panel.Out.outputs) > 0:
+	# 		print(x,' OutOut:',Elements.index(this_panel.Out.outputs[-1]))
 
 	# Having the final list of elements we calculate the total XY
 	# Filling elements positions
@@ -255,17 +255,17 @@ def nodePosXY(Elements, base=300):
 	idx = 0
 	for element in Elements:
 
-		if len(element.inputs) > 0:
-			inputs = Elements.index(element.inputs[-1])
-			xx = element.inputs[-1].x
-			# x1 = Elements.index(element.outputs[0])
-		else:
-			inputs = "nic"
-			xx = "nic"
-			x1 = "nic"
+		# if len(element.inputs) > 0:
+		# 	inputs = Elements.index(element.inputs[-1])
+		# 	xx = element.inputs[-1].x
+		# 	# x1 = Elements.index(element.outputs[0])
+		# else:
+		# 	inputs = "nic"
+		# 	xx = "nic"
+		# 	x1 = "nic"
 
-		print(idx,':', inputs,':',xx,':',x1)
-		idx += 1
+		# print(idx,':', inputs,':',xx,':',x1)
+		# idx += 1
 
 
 

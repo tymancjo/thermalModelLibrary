@@ -38,6 +38,8 @@ class Panel:
 
 		self.Air = Air # Air object for this panel
 		self.I = OutCurrent # The current
+		self.Iin = 0
+		self.Iout = 0
 		self.T0 = T0
 
 		# Need to define some interfaces
@@ -131,7 +133,9 @@ class PCPanel(object):
 		# super(Panel, self).__init__() # I don't know yet how to use this
 		self.T0 = T0
 		self.Air = Air
-		self.Load = Load
+		self.I = Load
+		self.Iin = 0
+		self.Iout = 0
 
 		self.setup()
 
