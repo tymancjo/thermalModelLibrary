@@ -54,7 +54,7 @@ SMB_6 = tntO.thermalElement(
 SMB_7 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,35,1000,2,0), 
-        HTC = 6,
+        HTC = 5,
         emissivity = 0.35,
         dP = True,
         source = 0,
@@ -64,7 +64,7 @@ SMB_7 = tntO.thermalElement(
 SMB_12 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,30,1000,4,0), 
-        HTC = 6,
+        HTC = 4.5,
         emissivity = 0.35,
         dP = True,
         source = 0,
@@ -74,7 +74,7 @@ SMB_12 = tntO.thermalElement(
 SMB_14 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,35,1000,4,0), 
-        HTC = 6,
+        HTC = 5.25,
         emissivity = 0.35,
         dP = True,
         source = 0,
@@ -84,7 +84,7 @@ SMB_14 = tntO.thermalElement(
 SMB_21 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,35,1000,6,0), 
-        HTC = 4.0,
+        HTC = 4.1,
         emissivity = 0.35,
         dP = True,
         source = 0,
@@ -94,7 +94,7 @@ SMB_21 = tntO.thermalElement(
 SMB_28 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,35,1000,8,0), 
-        HTC = 6,
+        HTC = 5.5,
         emissivity = 0.35,
         dP = True,
         source = 0,
@@ -104,7 +104,7 @@ SMB_28 = tntO.thermalElement(
 SMB_42 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,35,1000,12,0), 
-        HTC = 6,
+        HTC = 4,
         emissivity = 0.35,
         dP = True,
         source = 0,
