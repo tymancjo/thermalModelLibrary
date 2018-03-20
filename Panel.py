@@ -3,46 +3,31 @@
 from datetime import datetime
 startTime = datetime.now()
 
-import matplotlib.pyplot as plt #to biblioteka pozwalajaca nam wykreslać wykresy
-# import matplotlib.patches as patches
-# from matplotlib.collections import PatchCollection
+import matplotlib.pyplot as plt 
 import matplotlib as mpl
 import numpy as np
-import mpld3
-# import math
-
-# import numpy as np
 
 from thermalModelLibrary import tntObjects as tntO
 from thermalModelLibrary import tntPanelsSolver as tntS
 from thermalModelLibrary import tntPanel as tntP
 from thermalModelLibrary import elements as el
 
-# Defining some materials
-CuACB = tntO.Material(conductivity=7e6)
-
-# Defining some handy vallues
-# IP42 parameters 
-HTC = 6
-emmisivity = 0.35
 
 
 # Defining analysis elements objects
-ACB = el.EG_F2
-
-VBB = el.VBB_F2_2k5
-
-VBB_CT = el.CT_2x100_F2
-VBB_CT.rotate(-45)
-
-MBB = el.SMB_12
+T0=35
+I = 1600
+ACB = el.EG_F1
+VBB = el.VBB_F1G_1k6
+MBB = el.SMB_6
+CT = el.CT_2x40
 
 # New definition by: (Proto Node El, Length [mm], #nodes)
 PC_VBB =      [
                 (VBB, 900, 10), 
                 (ACB, 200, 4),
                 (VBB, 200, 4), 
-                (VBB_CT, 130, 3), 
+                (CT, 130, 3), 
                 (VBB, 200, 4), 
                 ]
 
@@ -50,6 +35,10 @@ PC_VBB =      [
 # New function to generate final list
 PC_VBB = tntS.generateNodes(PC_VBB) 
 
+
+
+
+# MBB for 1st panel
 PC_MBB = tntS.generateNodes([(MBB, 1000, 10)]) 
 
 
@@ -60,31 +49,30 @@ Panel = tntP.PCPanel(MBB=PC_MBB,
                      VBB=PC_VBB,
                      Load=False,
                      Air=None,
-                     T0=20)
-
-Panel.setCurrent(2500)
-
-Panel2 = tntP.PCPanel(MBB=PC_MBB,
-                     VBB=[],
-                     Load=False,
-                     Air=None,
-                     T0=20)
-
-Panel2.setCurrent(1500)
-
-
-Panels = [Panel, Panel2]
+                     T0=T0)
 
 
 
-Time, T, Stp, Nodes = tntS.PanelSolver(Panels, 20, 4*60*60, 
+# Setting up currents in panel (manually for now)
+
+
+Panel.set3I(Iin=I,
+            Iout=0,
+            Ifeeder=I)
+
+
+# setup the lineup
+Lineup = [Panel]
+
+Time, T, Stp, Nodes = tntS.PanelSolver(Lineup, T0, 6*60*60, 
                 iniTimeStep = 1,
                 tempStepAccuracy = 0.1)
 
+
+# below is plotting results
 print('execution time: ', datetime.now() - startTime)
 print('time steps: ', len(Time))
 print('solver steps: ', Stp)
-
 
 # Rest is just cleaning up data for plotting
 t = np.array(Time)
@@ -92,7 +80,7 @@ t = t / (60*60) # Time in hours
 
 # preparing temp rises as results
 b = np.array(T)
-b = b - 20
+b = b - T0
 
 # defining the main plot window
 fig = plt.figure('Temperature Rise Analysis ')
@@ -118,13 +106,13 @@ ax2.grid()
 # Defining the subplot for geometry heat map
 ax3 = fig.add_subplot(122, aspect='equal')
 # runs the defined procedure on this axis
-tntS.drawElements(ax3,Nodes,np.array(b[-1,:]))
+tntS.drawElements(ax3,Nodes,np.array(b[-1,:]), Text=False)
 
 plt.tight_layout()
 
 figG = plt.figure('Geometry thermal map ')
 axG = figG.add_subplot(111, aspect='equal')
-tntS.drawElements(axG,Nodes,np.array(b[-1,:]))
+tntS.drawElements(axG,Nodes,np.array(b[-1,:]), Text=True, T0=T0)
 
 
 scatter = axG.scatter([element.x for element in Nodes],

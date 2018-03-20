@@ -16,14 +16,18 @@ from thermalModelLibrary import elements as el
 
 # Defining analysis elements objects
 T0=35
+I = 3500
+VBB = el.VBB_F2_4k
+ACB = el.EG_F2_100
+MBB = el.SMB_21
 
 # New definition by: (Proto Node El, Length [mm], #nodes)
 PC_VBB =      [
-                (el.VBB_F2_4k, 900, 10), 
-                (el.EG_F2_100, 200, 4),
-                (el.VBB_F2_4k, 200, 4), 
+                (VBB, 900, 10), 
+                (ACB, 200, 4),
+                (VBB, 200, 4), 
                 (el.CT_3x100_F2, 130, 3), 
-                (el.VBB_F2_4k, 200, 4), 
+                (VBB, 200, 4), 
                 ]
 
 
@@ -53,8 +57,7 @@ PC_VBB3 =      [
 # New function to generate final list
 PC_VBB3 = tntS.generateNodes(PC_VBB3) 
 
-# MBB element
-MBB = el.SMB_21
+
 
 # MBB for 1st panel
 PC_MBB = tntS.generateNodes([(MBB, 1000, 10)]) 
@@ -88,10 +91,10 @@ Panel4 = tntP.PCPanel(MBB=PC_MBB1,
 
 
 # Setting up currents in panel (manually for now)
-I = 3600
 
-Panel.set3I(Iin=0,
-            Iout=I,
+
+Panel.set3I(Iin=I,
+            Iout=0,
             Ifeeder=I)
 
 Panel3.set3I(Iin=I,
@@ -103,7 +106,7 @@ Panel4.set3I(Iin=I-1900,
              Ifeeder=I-1900)
 
 # setup the lineup
-Lineup = [Panel, Panel3, Panel4]
+Lineup = [Panel]
 
 Time, T, Stp, Nodes = tntS.PanelSolver(Lineup, T0, 6*60*60, 
                 iniTimeStep = 1,

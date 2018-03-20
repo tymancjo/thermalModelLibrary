@@ -43,7 +43,8 @@ PC_VBB2 =      [
 PC_VBB2 = tntS.generateNodes(PC_VBB2) 
 
 # MBB element
-MBB = el.SMB_12
+MBB = el.SMB_6
+I = 1800
 
 # MBB for 1st panel
 PC_MBB = tntS.generateNodes([(MBB, 1000, 10)]) 
@@ -58,7 +59,7 @@ PC_MBB1 = tntS.generateNodes([(Lasza,100,1),(MBB, 600, 8)])
 
 
 Panel = tntP.PCPanel(MBB=PC_MBB,
-                     VBB=PC_VBB2,
+                     VBB=[],
                      Load=False,
                      Air=None,
                      T0=T0)
@@ -77,7 +78,7 @@ Panel4 = tntP.PCPanel(MBB=PC_MBB1,
 
 
 # Setting up currents in panel (manually for now)
-I = 3000
+
 
 Panel.set3I(Iin=I,
             Iout=I,
