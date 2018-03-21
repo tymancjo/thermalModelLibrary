@@ -51,7 +51,7 @@ class airObject(object):
 		# pointing any Y to propper air cell number
 		n = int(Y // self.aCellH)
 		# return (self.n - min(n, self.n)) - 1 # need to really rethink this
-		return min(n, self.n) # this oryginal logical one
+		return min(n, self.n-1) # this oryginal logical one
 
 	def T(self, Y):
 		# function returning the temperature at given height

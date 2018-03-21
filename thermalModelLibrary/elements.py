@@ -205,40 +205,50 @@ VBB_F3_6k = tntO.thermalElement(
 
 #CT lashes and other like that
 
-CT_1x100_F2 = tntO.thermalElement(
+CT_1x100 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,100,1000,1,-90), 
-        HTC = 6,
+        HTC = 5.5,
         emissivity = 0.35,
         dP = True,
         source = 0,
         material = Cu,
         acPower = 1.41)
 
-CT_2x100_F2 = tntO.thermalElement(
+CT_2x100 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,100,1000,2,-90), 
-        HTC = 6,
+        HTC = 5.5,
         emissivity = 0.35,
         dP = True,
         source = 0,
         material = Cu,
         acPower = 2)
 
-CT_3x100_F2 = tntO.thermalElement(
+CT_3x100 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,100,1000,3,-90), 
-        HTC = 6,
+        HTC = 5.5,
         emissivity = 0.35,
         dP = True,
         source = 0,
         material = Cu,
         acPower = 2.58)
 
+CT_4x100 = tntO.thermalElement(
+        # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
+        shape = tntO.shape(10,100,1000,4,-90), 
+        HTC = 5.5,
+        emissivity = 0.35,
+        dP = True,
+        source = 0,
+        material = Cu,
+        acPower = 3.25)
+
 CT_2x40 = tntO.thermalElement(
         # shape(width, height, length, number of bars in parrallel, pointing angle {0->right, 90->top, 180->left, 270-> down})
         shape = tntO.shape(10,40,1000,2,-90), 
-        HTC = 6,
+        HTC = 5.5,
         emissivity = 0.35,
         dP = True,
         source = 0,

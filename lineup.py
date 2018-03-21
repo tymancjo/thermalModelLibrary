@@ -7,11 +7,14 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 
-from thermalModelLibrary import tntObjects as tntO
-from thermalModelLibrary import tntPanelsSolver as tntS
-from thermalModelLibrary import tntPanel as tntP
+# from thermalModelLibrary import tntObjects as tntO
+# from thermalModelLibrary import tntPanel as tntP
 from thermalModelLibrary import elements as el
+
 from thermalModelLibrary import panels as p
+
+from thermalModelLibrary import tntPanelsSolver as tntS
+
 
 
 

@@ -6,6 +6,8 @@ from thermalModelLibrary import elements as el
 from thermalModelLibrary import tntPanelsSolver as tntS
 from thermalModelLibrary import tntPanel as tntP
 
+import copy
+
 
 '''
 The idea is to make some kind of builder for lineups
@@ -29,7 +31,7 @@ PC_VBB =      [
                 (el.VBB_F1G_1k6, 200, 4), 
                 ]
 VBB1600 = tntS.generateNodes(PC_VBB)
-Lasha = el.CT_1x100_F2
+Lasha = copy.deepcopy(el.CT_1x100)
 Lasha.rotate(0)
 SMB6 = tntS.generateNodes([(Lasha,100,1),(el.SMB_6,600,8)])
 
@@ -42,7 +44,7 @@ PC_VBB =      [
                 (el.VBB_F1G_2k, 200, 4), 
                 ]
 VBB2000 = tntS.generateNodes(PC_VBB)
-Lasha = el.CT_1x100_F2
+Lasha = copy.deepcopy(el.CT_1x100)
 Lasha.rotate(0)
 SMB7 = tntS.generateNodes([(Lasha,100,1),(el.SMB_7,600,8)])
 
@@ -51,11 +53,11 @@ PC_VBB =      [
                 (el.VBB_F2_2k5, 900, 10), 
                 (el.EG_F2, 200, 4),
                 (el.VBB_F2_2k5, 200, 4), 
-                (el.CT_1x100_F2, 130, 3), 
+                (el.CT_1x100, 130, 3), 
                 (el.VBB_F2_2k5, 200, 4), 
                 ]
 VBB2500 = tntS.generateNodes(PC_VBB)
-Lasha = el.CT_1x100_F2
+Lasha = copy.deepcopy(el.CT_1x100)
 Lasha.rotate(0)
 SMB12 = tntS.generateNodes([(Lasha,100,1),(el.SMB_12,800,8)])
 
@@ -64,11 +66,11 @@ PC_VBB =      [
                 (el.VBB_F2_3k2, 900, 10), 
                 (el.EG_F2, 200, 4),
                 (el.VBB_F2_3k2, 200, 4), 
-                (el.CT_2x100_F2, 130, 3), 
+                (el.CT_2x100, 130, 3), 
                 (el.VBB_F2_3k2, 200, 4), 
                 ]
 VBB3200 = tntS.generateNodes(PC_VBB)
-Lasha = el.CT_1x100_F2
+Lasha = copy.deepcopy(el.CT_1x100)
 Lasha.rotate(0)
 SMB14 = tntS.generateNodes([(Lasha,100,1),(el.SMB_14,800,8)])
 
@@ -77,11 +79,11 @@ PC_VBB =      [
                 (el.VBB_F2_4k, 900, 10), 
                 (el.EG_F2_100, 200, 4),
                 (el.VBB_F2_4k, 200, 4), 
-                (el.CT_2x100_F2, 130, 3), 
+                (el.CT_2x100, 130, 3), 
                 (el.VBB_F2_4k, 200, 4), 
                 ]
 VBB4000 = tntS.generateNodes(PC_VBB)
-Lasha = el.CT_2x100_F2
+Lasha = copy.deepcopy(el.CT_2x100)
 Lasha.rotate(0)
 SMB21 = tntS.generateNodes([(Lasha,100,1),(el.SMB_14,800,8)])
 
@@ -90,11 +92,11 @@ PC_VBB =      [
                 (el.VBB_F3_5k, 900, 10), 
                 (el.EG_F3, 200, 4),
                 (el.VBB_F3_5k, 200, 4), 
-                (el.CT_3x100_F2, 130, 3), 
+                (el.CT_3x100, 130, 3), 
                 (el.VBB_F3_5k, 200, 4), 
                 ]
 VBB5000 = tntS.generateNodes(PC_VBB)
-Lasha = el.CT_2x100_F2
+Lasha = copy.deepcopy(el.CT_2x100)
 Lasha.rotate(0)
 SMB28 = tntS.generateNodes([(Lasha,100,1),(el.SMB_28,1000,8)])
 
@@ -103,11 +105,11 @@ PC_VBB =      [
                 (el.VBB_F3_6k, 900, 10), 
                 (el.EG_F3, 200, 4),
                 (el.VBB_F3_6k, 200, 4), 
-                (el.CT_3x100_F2, 130, 3), 
+                (el.CT_3x100, 130, 3), 
                 (el.VBB_F3_6k, 200, 4), 
                 ]
 VBB5000 = tntS.generateNodes(PC_VBB)
-Lasha = el.CT_3x100_F2
+Lasha = copy.deepcopy(el.CT_3x100)
 Lasha.rotate(0)
 SMB42 = tntS.generateNodes([(Lasha,100,1),(el.SMB_42,1000,8)])
 
