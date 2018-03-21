@@ -38,7 +38,7 @@ from thermalModelLibrary import tntAir as tntA
 from thermalModelLibrary import tntPanel as tntP
 
 
-def PanelSolver(Panels, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
+def PanelSolver(Panels, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1, current=0):
 	# Preparing list to capture all elements
 	Elements = []
 
@@ -93,7 +93,7 @@ def PanelSolver(Panels, T0, EndTime, iniTimeStep = 1, tempStepAccuracy = 0.1):
 				node.air = this_panel.Air
 
 			# Having all the input for this panel Air we can solve it
-			this_panel.Air.solveT(1) # Solving with sorting
+			this_panel.Air.solveT(this_panel.AirSort) # Solving with sorting
 
 
 	# Preparing the starting temperatures 
@@ -255,24 +255,24 @@ def nodePosXY(Elements, base=300):
 	idx = 0
 	for element in Elements:
 
-		# if len(element.inputs) > 0:
-		# 	inputs = Elements.index(element.inputs[-1])
-		# 	xx = element.inputs[-1].x
-		# 	# x1 = Elements.index(element.outputs[0])
-		# else:
-		# 	inputs = "nic"
-		# 	xx = "nic"
-		# 	x1 = "nic"
+		if len(element.inputs) > 0:
+			inputs = Elements.index(element.inputs[-1])
+			xx = element.inputs[-1].x
+			# x1 = Elements.index(element.outputs[0])
+		else:
+			inputs = "nic"
+			xx = "nic"
+			x1 = "nic"
 
-		# print(idx,':', inputs,':',xx,':',x1)
-		# idx += 1
+		print(idx,':', inputs,':',xx,':',x1)
+		idx += 1
 
 
 
 		if len(element.inputs) == 0 or element is Elements[0]:
-			if element.x == 0:
+			if element.x == 0 or element.x == None:
 				element.x = element.shape.getPos()['x'] / 2
-			if element.y == 0:
+			if element.y == 0 or element.y == None:
 				element.y = element.shape.getPos()['y'] / 2
 		else:
 			element.x = element.inputs[-1].x + 0.5*element.inputs[-1].shape.getPos()['x'] + element.shape.getPos()['x'] / 2
