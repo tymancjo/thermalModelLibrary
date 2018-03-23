@@ -314,7 +314,7 @@ def drawElements(axis, Elements, Temperatures=None, Text=False, T0=25):
     minX = 0
     minY = 0
 
-    for element in Elements:
+    for idx,element in enumerate(Elements):
     	#  going for each element
 
             # gatherin data from element shape geometry
@@ -351,7 +351,7 @@ def drawElements(axis, Elements, Temperatures=None, Text=False, T0=25):
 	            # ty = element.y + math.cos(angle)*max(shapeH, shapeW)
 	            tx = element.x 
 	            ty = element.y 
-	            txt = '{}K'.format(round(element.T-T0,0))
+	            txt = '({}) {}K'.format(idx, round(element.T-T0,0))
 	            
 	            # l = mlines.Line2D([rx,tx], [ry,ty])
 	            # axis.add_line(l)
